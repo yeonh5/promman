@@ -199,12 +199,8 @@
           <textarea id="ko-input" placeholder="여기에 장면을 한국어로 적어보세요.&#10;예) 한국 남녀가 풋풋하게 종로 호프에서 맥주를 마시고 있다"></textarea>
           <button class="btn" id="generate-btn">Groq로 번역</button>
         </div>
-        <div style="margin-top:6px; display:flex; gap:8px; align-items:center;">
-          <input id="groq-key" type="password" placeholder="GROQ_API_KEY" style="flex:1; padding:4px 8px; border-radius:999px; border:1px solid #374151; background:#020617; color:#e5e7eb; font-size:11px;">
-          <span class="badge">키는 브라우저에만 사용 · 노출 주의</span>
-        </div>
       </div>
-      <div id="status-left" class="status">Groq API 키를 입력한 뒤 번역 버튼을 눌러보세요.</div>
+      <div id="status-left" class="status">버튼을 눌러 장면을 프롬프트로 변환해보세요.</div>
     </section>
 
     <!-- 2. SceneSchema JSON -->
@@ -500,7 +496,16 @@ Return ONLY the JSON, with no explanation.`;
     const statusLeft = document.getElementById("status-left");
     const statusRight = document.getElementById("status-right");
     const copyBtn = document.getElementById("copy-btn");
-    const groqKeyInput = document.getElementById("groq-key");
+
+    // ===== 3-1) Groq 키: 브라우저 localStorage에서만 읽기 =====
+    const GROQ_KEY_STORAGE_KEY = "promman_groq_api_key";
+    function getGroqApiKey() {
+      try {
+        return window.localStorage.getItem(GROQ_KEY_STORAGE_KEY) || "";
+      } catch {
+        return "";
+      }
+    }
 
     function setStatus(el, text, isError) {
       el.textContent = text;
@@ -514,9 +519,9 @@ Return ONLY the JSON, with no explanation.`;
         setStatus(statusLeft, "한국어 장면 설명을 먼저 입력하세요.", true);
         return;
       }
-      const apiKey = groqKeyInput.value.trim();
+      const apiKey = getGroqApiKey();
       if (!apiKey) {
-        setStatus(statusLeft, "Groq API 키를 입력해주세요.", true);
+        setStatus(statusLeft, "이 브라우저의 localStorage에 Groq API 키가 저장되어 있지 않습니다.", true);
         return;
       }
 
