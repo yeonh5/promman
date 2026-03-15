@@ -572,6 +572,18 @@
         wide: "a wide shot",
         long: "a long shot"
       };
+      const angleTextMap = {
+        eye_level: "from eye level",
+        low_angle: "from a low angle looking up",
+        high_angle: "from a high angle looking down",
+        birds_eye_view: "from a bird's eye view directly above",
+        worms_eye_view: "from a worm's eye view looking up from below",
+        dutch_angle: "with a Dutch (canted) angle",
+        over_the_shoulder: "over the shoulder",
+        point_of_view: "from a point-of-view (POV) perspective",
+        top_down: "from directly above",
+        unspecified: ""
+      };
       const movementTextMap = {
         static: "from a static camera",
         pan: "with a gentle pan",
@@ -586,6 +598,7 @@
       };
 
       const shotText = shotTextMap[camera.shot] || "a medium shot";
+      const angleText = angleTextMap[camera.angle] || angleTextMap.unspecified;
       const movementText = movementTextMap[camera.movement || "unspecified"] || "";
       const depthText = camera.depthOfField_en || "natural depth of field";
 
@@ -632,8 +645,10 @@
         lines.push("Characters: " + scene.personas.join(", ") + ".");
       }
       lines.push("");
+      const anglePhrase = angleText ? " " + angleText : "";
       lines.push(
         shotText +
+          anglePhrase +
           " of " +
           subjectDescriptions +
           (relationshipPhrase ? ", " + relationshipPhrase : "") +
