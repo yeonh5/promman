@@ -398,94 +398,23 @@
       return lines.join("\n");
     }
 
-    // ===== 2) Groq: 한국어 → SceneSchema JSON =====
-    async function koreanToSceneSchemaGroq(koreanText, apiKey) {
-      const systemPrompt = `
-You are a scene parser for a cinematic image prompt generator.
-The user will give you a short scene description in Korean.
-You MUST respond with a single JSON object that matches this interface:
-
-interface SceneSchema {
-  original_text_ko: string;
-  subjects: {
-    id: string;
-    type: "human" | "animal" | "object" | "vehicle" | "other";
-    role?: string;
-    ageGroup?: "teens" | "20s" | "30s" | "40s" | "50s_plus";
-    gender?: "male" | "female" | "non_binary" | "unknown";
-    ethnicity?: "Korean" | "East_Asian" | "Western" | "Other" | "Unknown";
-    description_en?: string;
-  }[];
-  relationship?: "friends" | "couple" | "colleagues" | "family" | "strangers" | "unspecified";
-  primary_action: {
-    main_verb_en: string;
-    detail_en?: string;
-    motion_intensity?: "subtle" | "moderate" | "intense";
-    emotional_change_en?: string;
-  };
-  location: {
-    name_en?: string;
-    type?: "street" | "indoor_bar" | "outdoor_terrace" | "restaurant" | "apartment" | "office" | "other";
-    detail_en?: string;
-  };
-  environment: {
-    timeOfDay: "day" | "night" | "golden_hour" | "dawn" | "dusk" | "unspecified";
-    weather: "clear" | "rainy" | "foggy" | "snowy" | "overcast" | "unspecified";
-    atmosphere_en?: string;
-    colorGrading: "neutral" | "warm" | "cool" | "teal_orange" | "monochrome" | "vibrant" | "muted" | "unspecified";
-  };
-  camera: {
-    shot: "extreme_close_up" | "close_up" | "medium" | "medium_wide" | "wide" | "long";
-    angle: "eye_level" | "high_angle" | "low_angle" | "dutch_angle" | "top_down" | "unspecified";
-    movement: "static" | "pan" | "tilt" | "dolly_in" | "dolly_out" | "truck" | "arc" | "crane" | "handheld" | "unspecified";
-    lens_mm?: number;
-    depthOfField_en?: string;
-  };
-  lighting: {
-    style: "natural" | "high_key" | "low_key" | "golden_hour" | "volumetric" | "rembrandt" | "neon" | "unspecified";
-    description_en?: string;
-  };
-  mood?: {
-    tone_en?: string;
-    pacing_en?: string;
-  };
-  styleControl: {
-    stylePreset: "korean_urban_romance_film" | "korean_indie_drama" | "hollywood_blockbuster" | "documentary" | "anime" | "photoreal" | "unspecified";
-    allow_stylization: boolean;
-    required_keywords_en: string[];
-    forbidden_keywords_en: string[];
-  };
-}
-
-Focus on realistic Korean film style (not anime, not hyper-realistic plastic skin).
-Return ONLY the JSON, with no explanation.`;
-
-      const userPrompt = `한국어 장면 설명: "${koreanText}"`;
-
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    // ===== 2) Groq: 한국어 → SceneSchema JSON (백엔드 /api/scene 경유) =====
+    async function koreanToSceneSchemaGroq(koreanText) {
+      const res = await fetch("/api/scene", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + apiKey
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          model: "llama-3.1-70b-versatile",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt }
-          ],
-          temperature: 0.3
-        })
+        body: JSON.stringify({ koreanText })
       });
 
       if (!res.ok) {
         const txt = await res.text();
-        throw new Error("Groq error: " + txt);
+        throw new Error("Backend error: " + txt);
       }
 
-      const data = await res.json();
-      const content = data.choices?.[0]?.message?.content || "{}";
-      return JSON.parse(content);
+      const scene = await res.json();
+      return scene;
     }
 
     // ===== 3) UI 연결 =====
@@ -497,16 +426,6 @@ Return ONLY the JSON, with no explanation.`;
     const statusRight = document.getElementById("status-right");
     const copyBtn = document.getElementById("copy-btn");
 
-    // ===== 3-1) Groq 키: 브라우저 localStorage에서만 읽기 =====
-    const GROQ_KEY_STORAGE_KEY = "promman_groq_api_key";
-    function getGroqApiKey() {
-      try {
-        return window.localStorage.getItem(GROQ_KEY_STORAGE_KEY) || "";
-      } catch {
-        return "";
-      }
-    }
-
     function setStatus(el, text, isError) {
       el.textContent = text;
       if (isError) el.classList.add("error");
@@ -517,11 +436,6 @@ Return ONLY the JSON, with no explanation.`;
       const text = koInput.value.trim();
       if (!text) {
         setStatus(statusLeft, "한국어 장면 설명을 먼저 입력하세요.", true);
-        return;
-      }
-      const apiKey = getGroqApiKey();
-      if (!apiKey) {
-        setStatus(statusLeft, "이 브라우저의 localStorage에 Groq API 키가 저장되어 있지 않습니다.", true);
         return;
       }
 
