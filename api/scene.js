@@ -117,7 +117,16 @@ Return ONLY the JSON, with no explanation.`;
     }
 
     const data = await groqRes.json();
-    const content = data.choices?.[0]?.message?.content || "{}";
+    let content = data.choices?.[0]?.message?.content || "{}";
+
+    // 일부 모델이 ```json ... ``` 형태로 감싸서 반환하는 경우 처리
+    if (typeof content === "string" && content.trim().startsWith("```")) {
+      content = content.trim()
+        .replace(/^```[a-zA-Z]*\s*/,'') // 맨 앞 ``` 또는 ```json 제거
+        .replace(/```$/,'')            // 맨 끝 ``` 제거
+        .trim();
+    }
+
     const scene = JSON.parse(content);
 
     res.statusCode = 200;
