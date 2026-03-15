@@ -15,30 +15,45 @@
       flex-direction: column;
     }
     header {
-      padding: 12px 16px;
+      padding: 20px 16px 12px;
       background: #020617;
       border-bottom: 1px solid #1f2937;
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
+    }
+    .logo-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 20px;
+      color: #3b82f6;
+      background: radial-gradient(circle at 30% 0%, #1d4ed8, #020617);
+      box-shadow: 0 0 0 1px rgba(15,23,42,0.9), 0 18px 40px rgba(15,23,42,0.9);
     }
     header h1 {
       font-size: 18px;
       margin: 0;
       font-weight: 800;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
     }
     header h1 span { color: #3b82f6; }
     header span.sub {
       font-size: 12px;
       color: #9ca3af;
+      text-align: center;
     }
     main {
       flex: 1;
       display: grid;
-      grid-template-columns: 1.2fr 1.3fr 1.5fr;
+      grid-template-columns: 1.4fr 1fr;
       min-height: 0;
     }
     .column {
@@ -128,16 +143,6 @@
     }
     .status.error { color: #f97373; }
 
-    .json-view {
-      flex: 1;
-      min-height: 0;
-    }
-    .json-view textarea {
-      height: 100%;
-      font-size: 11px;
-      color: #9ca3af;
-    }
-
     .output {
       flex: 1;
       padding: 12px;
@@ -183,45 +188,23 @@
 </head>
 <body>
   <header>
+    <div class="logo-mark">P</div>
     <h1><span>prom</span>man</h1>
-    <span class="sub">Groq LLM으로 한국어 장면 → SceneSchema → 영화 스틸 프롬프트</span>
+    <span class="sub">한국어 장면을 영화 스틸 프롬프트로 변환하는 작은 촬영감독 도우미</span>
   </header>
 
   <main>
-    <!-- 1. 한국어 입력 -->
+    <!-- 왼쪽: 한국어 입력 + 결과 프롬프트 -->
     <section class="column">
       <div class="section-header">
-        <span>Scene Input (Korean)</span>
-        <span class="sub2">예: 한국 남녀가 풋풋하게 종로 호프에서 맥주를 마시고 있다</span>
+        <span>Generated Cinematic Prompt</span>
+        <span class="sub2">영화 스틸 느낌의 영어 프롬프트</span>
       </div>
       <div class="ko-input-wrapper">
         <div class="ko-row">
           <textarea id="ko-input" placeholder="여기에 장면을 한국어로 적어보세요.&#10;예) 한국 남녀가 풋풋하게 종로 호프에서 맥주를 마시고 있다"></textarea>
           <button class="btn" id="generate-btn">Groq로 번역</button>
         </div>
-      </div>
-      <div id="status-left" class="status">버튼을 눌러 장면을 프롬프트로 변환해보세요.</div>
-    </section>
-
-    <!-- 2. SceneSchema JSON -->
-    <section class="column">
-      <div class="section-header">
-        <span>Internal SceneSchema JSON</span>
-        <span class="sub2">Groq LLM이 생성 · 읽기 전용</span>
-      </div>
-      <div class="json-view">
-        <textarea id="scene-json" readonly></textarea>
-      </div>
-      <div class="footer">
-        <span class="status">이 구조가 프리셋/프롬프트의 기반이 됩니다.</span>
-      </div>
-    </section>
-
-    <!-- 3. 프롬프트 출력 -->
-    <section class="column">
-      <div class="section-header">
-        <span>Generated Cinematic Prompt</span>
-        <span class="sub2">영화 스틸 느낌의 영어 프롬프트</span>
       </div>
       <div id="prompt-output" class="output"></div>
       <div class="footer">
@@ -233,6 +216,70 @@
             <option value="kling">Kling</option>
           </select>
           <button class="btn secondary" id="copy-btn">프롬프트 복사</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 오른쪽: 촬영감독 컨트롤 패널 -->
+    <section class="column">
+      <div class="section-header">
+        <span>Director Controls</span>
+        <span class="sub2">카메라 · 시간 · 감독 톤</span>
+      </div>
+      <div style="padding: 10px 12px; display: flex; flex-direction: column; gap: 12px;">
+        <!-- 카메라 화각 -->
+        <div>
+          <div class="status" style="padding-left:0;">카메라 화각 (Shot)</div>
+          <select id="shot-select" class="select" style="width:100%; margin-top:4px;">
+            <option value="">SceneSchema에 맡기기</option>
+            <option value="extreme_close_up">익스트림 클로즈업</option>
+            <option value="close_up">클로즈업</option>
+            <option value="medium">미디엄 투샷</option>
+            <option value="medium_wide">미디엄 와이드</option>
+            <option value="wide">와이드샷</option>
+            <option value="long">롱샷</option>
+          </select>
+        </div>
+
+        <!-- 카메라 앵글 -->
+        <div>
+          <div class="status" style="padding-left:0;">카메라 앵글 (Angle)</div>
+          <select id="angle-select" class="select" style="width:100%; margin-top:4px;">
+            <option value="">SceneSchema에 맡기기</option>
+            <option value="eye_level">아이 레벨</option>
+            <option value="high_angle">하이 앵글</option>
+            <option value="low_angle">로우 앵글</option>
+            <option value="dutch_angle">더치 앵글</option>
+            <option value="top_down">탑다운</option>
+          </select>
+        </div>
+
+        <!-- 시간 / 밤낮 -->
+        <div>
+          <div class="status" style="padding-left:0;">시간과 분위기</div>
+          <div style="display:flex; gap:8px; margin-top:4px; align-items:center;">
+            <select id="time-select" class="select" style="flex:1;">
+              <option value="">SceneSchema에 맡기기</option>
+              <option value="day">낮</option>
+              <option value="golden_hour">골든아워</option>
+              <option value="dusk">해질녘</option>
+              <option value="night">밤</option>
+            </select>
+            <input id="clock-range" type="range" min="0" max="23" value="20" style="flex:1;">
+            <span id="clock-label" class="badge">20:00</span>
+          </div>
+        </div>
+
+        <!-- 감독 프리셋 -->
+        <div>
+          <div class="status" style="padding-left:0;">감독 스타일 프리셋</div>
+          <select id="director-select" class="select" style="width:100%; margin-top:4px;">
+            <option value="none">선택 안 함 (SceneSchema 그대로)</option>
+            <option value="park_chan_wook">박찬욱 · 다크하고 정교한 프레이밍</option>
+            <option value="bong_joon_ho">봉준호 · 현실감+사회적 긴장</option>
+            <option value="greta_gerwig">그레타 거윅 · 밝고 따뜻한 청춘</option>
+            <option value="nolan">크리스토퍼 놀란 · 스케일 큰 서사와 극적 대비</option>
+          </select>
         </div>
       </div>
     </section>
@@ -420,11 +467,19 @@
     // ===== 3) UI 연결 =====
     const koInput = document.getElementById("ko-input");
     const generateBtn = document.getElementById("generate-btn");
-    const sceneJson = document.getElementById("scene-json");
     const promptOutput = document.getElementById("prompt-output");
-    const statusLeft = document.getElementById("status-left");
     const statusRight = document.getElementById("status-right");
     const copyBtn = document.getElementById("copy-btn");
+    const shotSelect = document.getElementById("shot-select");
+    const angleSelect = document.getElementById("angle-select");
+    const timeSelect = document.getElementById("time-select");
+    const clockRange = document.getElementById("clock-range");
+    const clockLabel = document.getElementById("clock-label");
+    const directorSelect = document.getElementById("director-select");
+
+    function setStatusRight(text, isError) {
+      setStatus(statusRight, text, isError);
+    }
 
     function setStatus(el, text, isError) {
       el.textContent = text;
@@ -432,28 +487,86 @@
       else el.classList.remove("error");
     }
 
+    function applyDirectorOverrides(scene) {
+      const override = directorSelect.value;
+      if (!override || override === "none") return scene;
+
+      scene.styleControl = scene.styleControl || {
+        stylePreset: "unspecified",
+        allow_stylization: true,
+        required_keywords_en: [],
+        forbidden_keywords_en: []
+      };
+      scene.mood = scene.mood || {};
+
+      switch (override) {
+        case "park_chan_wook":
+          scene.styleControl.stylePreset = "korean_indie_drama";
+          scene.mood.tone_en = "dark, tense, meticulously composed like a Park Chan-wook film";
+          scene.styleControl.required_keywords_en.push("highly composed framing", "Korean auteur cinema");
+          break;
+        case "bong_joon_ho":
+          scene.styleControl.stylePreset = "korean_urban_romance_film";
+          scene.mood.tone_en = "realistic, slightly satirical, with social tension like a Bong Joon-ho film";
+          scene.styleControl.required_keywords_en.push("Korean realist cinema", "subtle social commentary");
+          break;
+        case "greta_gerwig":
+          scene.styleControl.stylePreset = "korean_urban_romance_film";
+          scene.mood.tone_en = "warm, tender, youth-driven energy like a Greta Gerwig film";
+          scene.styleControl.required_keywords_en.push("soft pastel colors", "gentle whimsical tone");
+          break;
+        case "nolan":
+          scene.styleControl.stylePreset = "hollywood_blockbuster";
+          scene.mood.tone_en = "epic, serious, high-stakes atmosphere like a Christopher Nolan film";
+          scene.styleControl.required_keywords_en.push("strong contrast lighting", "precise, dramatic framing");
+          break;
+      }
+
+      return scene;
+    }
+
+    function applyCameraOverrides(scene) {
+      scene.camera = scene.camera || {};
+      scene.environment = scene.environment || {};
+
+      if (shotSelect.value) {
+        scene.camera.shot = shotSelect.value;
+      }
+      if (angleSelect.value) {
+        scene.camera.angle = angleSelect.value;
+      }
+      if (timeSelect.value) {
+        scene.environment.timeOfDay = timeSelect.value;
+      }
+
+      return scene;
+    }
+
+    clockRange.addEventListener("input", () => {
+      const h = parseInt(clockRange.value, 10) || 0;
+      const label = `${String(h).padStart(2, "0")}:00`;
+      clockLabel.textContent = label;
+    });
+
     generateBtn.addEventListener("click", async () => {
       const text = koInput.value.trim();
       if (!text) {
-        setStatus(statusLeft, "한국어 장면 설명을 먼저 입력하세요.", true);
+        setStatusRight("한국어 장면 설명을 먼저 입력하세요.", true);
         return;
       }
 
-      sceneJson.value = "";
       promptOutput.textContent = "";
-      setStatus(statusLeft, "Groq로 SceneSchema 생성 중...", false);
-      setStatus(statusRight, "LLM 응답을 기다리는 중...", false);
+      setStatusRight("Groq로 SceneSchema 생성 중...", false);
 
       try {
-        const scene = await koreanToSceneSchemaGroq(text);
-        sceneJson.value = JSON.stringify(scene, null, 2);
+        let scene = await koreanToSceneSchemaGroq(text);
+        scene = applyCameraOverrides(scene);
+        scene = applyDirectorOverrides(scene);
         const prompt = buildPromptFromScene(scene);
         promptOutput.textContent = prompt;
-        setStatus(statusLeft, "SceneSchema 생성 완료.", false);
-        setStatus(statusRight, "프롬프트 생성 완료.", false);
+        setStatusRight("SceneSchema · 프롬프트 생성 완료.", false);
       } catch (e) {
-        setStatus(statusLeft, "SceneSchema 생성 실패: " + e.message, true);
-        setStatus(statusRight, "프롬프트 생성 실패.", true);
+        setStatusRight("SceneSchema 생성 실패: " + e.message, true);
       }
     });
 
