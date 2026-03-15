@@ -564,24 +564,30 @@
           colorGradingText = "muted, understated color grading"; break;
       }
 
-      const shotTextMap = {
-        extreme_close_up: "an extreme close-up shot",
-        close_up: "a close-up shot",
-        medium: "a medium two-shot",
-        medium_wide: "a medium wide shot",
-        wide: "a wide shot",
-        long: "a long shot"
+      // 화각·앵글: 프롬프트 상단 Framing 블록용 표준 키워드 (이미지 모델이 확실히 인식하도록)
+      const shotKeywordMap = {
+        extreme_close_up: "Extreme close-up",
+        close_up: "Close-up",
+        medium_close_up: "Medium close-up",
+        medium: "Medium shot",
+        medium_wide: "Medium wide shot",
+        wide: "Wide shot",
+        extreme_wide: "Extreme wide shot",
+        long: "Long shot"
       };
-      const angleTextMap = {
-        eye_level: "from eye level",
-        low_angle: "from a low angle looking up",
-        high_angle: "from a high angle looking down",
-        birds_eye_view: "from a bird's eye view directly above",
-        worms_eye_view: "from a worm's eye view looking up from below",
-        dutch_angle: "with a Dutch (canted) angle",
-        over_the_shoulder: "over the shoulder",
-        point_of_view: "from a point-of-view (POV) perspective",
-        top_down: "from directly above",
+      const angleKeywordMap = {
+        eye_level: "Eye level",
+        low_angle: "Low angle",
+        high_angle: "High angle",
+        top_down: "Bird's eye view (top-down)",
+        worms_eye: "Worm's eye view",
+        dutch_angle: "Dutch angle (canted)",
+        over_shoulder: "Over-the-shoulder",
+        pov: "Point-of-view (POV)",
+        birds_eye_view: "Bird's eye view (top-down)",
+        worms_eye_view: "Worm's eye view",
+        over_the_shoulder: "Over-the-shoulder",
+        point_of_view: "Point-of-view (POV)",
         unspecified: ""
       };
       const movementTextMap = {
@@ -597,8 +603,8 @@
         unspecified: ""
       };
 
-      const shotText = shotTextMap[camera.shot] || "a medium shot";
-      const angleText = angleTextMap[camera.angle] || angleTextMap.unspecified;
+      const shotKeyword = shotKeywordMap[camera.shot] || "Medium shot";
+      const angleKeyword = angleKeywordMap[camera.angle] || "Eye level";
       const movementText = movementTextMap[camera.movement || "unspecified"] || "";
       const depthText = camera.depthOfField_en || "natural depth of field";
 
@@ -641,17 +647,19 @@
 
       const lines = [];
       lines.push(stylePresetText);
+      lines.push("");
+      // 화각·앵글을 최상단에 명시해 원하는 프레임을 확정
+      lines.push("Framing:");
+      lines.push("Shot: " + shotKeyword + ".");
+      lines.push("Camera angle: " + angleKeyword + ".");
+      lines.push("");
       if (scene.personas && Array.isArray(scene.personas) && scene.personas.length) {
         lines.push("Characters: " + scene.personas.join(", ") + ".");
       }
-      lines.push("");
-      const anglePhrase = angleText ? " " + angleText : "";
       lines.push(
-        shotText +
-          anglePhrase +
-          " of " +
+        "Scene: " +
           subjectDescriptions +
-          (relationshipPhrase ? ", " + relationshipPhrase : "") +
+          (relationshipPhrase ? " " + relationshipPhrase : "") +
           ", at " +
           locationText +
           (timeOfDayText ? " " + timeOfDayText : "") +
