@@ -445,7 +445,7 @@
       setStatus(statusRight, "LLM 응답을 기다리는 중...", false);
 
       try {
-        const scene = await koreanToSceneSchemaGroq(text, apiKey);
+        const scene = await koreanToSceneSchemaGroq(text);
         sceneJson.value = JSON.stringify(scene, null, 2);
         const prompt = buildPromptFromScene(scene);
         promptOutput.textContent = prompt;
