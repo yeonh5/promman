@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>promman – Groq prototype</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #020617;
+      color: #e5e7eb;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      padding: 12px 16px;
+      background: #020617;
+      border-bottom: 1px solid #1f2937;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    header h1 {
+      font-size: 18px;
+      margin: 0;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    header h1 span { color: #3b82f6; }
+    header span.sub {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.2fr 1.3fr 1.5fr;
+      min-height: 0;
+    }
+    .column {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      border-left: 1px solid #1f2937;
+    }
+    .column:first-child { border-left: none; }
+
+    .section-header {
+      padding: 8px 12px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+      border-bottom: 1px solid #1f2937;
+      background: #020617;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-header span.sub2 {
+      font-size: 11px;
+      text-transform: none;
+      letter-spacing: 0;
+      color: #6b7280;
+    }
+
+    textarea {
+      border: none;
+      resize: none;
+      padding: 12px;
+      background: #020617;
+      color: #e5e7eb;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      outline: none;
+      border-radius: 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .ko-input-wrapper {
+      padding: 10px 12px;
+      border-bottom: 1px solid #1f2937;
+    }
+    .ko-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .ko-row textarea {
+      flex: 1;
+      min-height: 80px;
+      max-height: 150px;
+    }
+
+    .btn {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .btn:hover { background: #2563eb; }
+    .btn.secondary {
+      background: #111827;
+      color: #e5e7eb;
+      border: 1px solid #374151;
+    }
+    .btn.secondary:hover { background: #1f2937; }
+
+    .status {
+      font-size: 11px;
+      color: #9ca3af;
+      padding: 4px 12px 0;
+    }
+    .status.error { color: #f97373; }
+
+    .json-view {
+      flex: 1;
+      min-height: 0;
+    }
+    .json-view textarea {
+      height: 100%;
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    .output {
+      flex: 1;
+      padding: 12px;
+      background: #020617;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      overflow: auto;
+    }
+
+    .footer {
+      padding: 8px 12px;
+      border-top: 1px solid #1f2937;
+      background: #020617;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .right-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .select {
+      background: #020617;
+      color: #e5e7eb;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      padding: 5px 10px;
+      font-size: 11px;
+    }
+    .badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #111827;
+      border: 1px solid #374151;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><span>prom</span>man</h1>
+    <span class="sub">Groq LLM으로 한국어 장면 → SceneSchema → 영화 스틸 프롬프트</span>
+  </header>
+
+  <main>
+    <!-- 1. 한국어 입력 -->
+    <section class="column">
+      <div class="section-header">
+        <span>Scene Input (Korean)</span>
+        <span class="sub2">예: 한국 남녀가 풋풋하게 종로 호프에서 맥주를 마시고 있다</span>
+      </div>
+      <div class="ko-input-wrapper">
+        <div class="ko-row">
+          <textarea id="ko-input" placeholder="여기에 장면을 한국어로 적어보세요.&#10;예) 한국 남녀가 풋풋하게 종로 호프에서 맥주를 마시고 있다"></textarea>
+          <button class="btn" id="generate-btn">Groq로 번역</button>
+        </div>
+        <div style="margin-top:6px; display:flex; gap:8px; align-items:center;">
+          <input id="groq-key" type="password" placeholder="GROQ_API_KEY" style="flex:1; padding:4px 8px; border-radius:999px; border:1px solid #374151; background:#020617; color:#e5e7eb; font-size:11px;">
+          <span class="badge">키는 브라우저에만 사용 · 노출 주의</span>
+        </div>
+      </div>
+      <div id="status-left" class="status">Groq API 키를 입력한 뒤 번역 버튼을 눌러보세요.</div>
+    </section>
+
+    <!-- 2. SceneSchema JSON -->
+    <section class="column">
+      <div class="section-header">
+        <span>Internal SceneSchema JSON</span>
+        <span class="sub2">Groq LLM이 생성 · 읽기 전용</span>
+      </div>
+      <div class="json-view">
+        <textarea id="scene-json" readonly></textarea>
+      </div>
+      <div class="footer">
+        <span class="status">이 구조가 프리셋/프롬프트의 기반이 됩니다.</span>
+      </div>
+    </section>
+
+    <!-- 3. 프롬프트 출력 -->
+    <section class="column">
+      <div class="section-header">
+        <span>Generated Cinematic Prompt</span>
+        <span class="sub2">영화 스틸 느낌의 영어 프롬프트</span>
+      </div>
+      <div id="prompt-output" class="output"></div>
+      <div class="footer">
+        <span id="status-right" class="status">아직 생성되지 않았습니다.</span>
+        <div class="right-controls">
+          <select id="model-select" class="select">
+            <option value="generic">Generic</option>
+            <option value="nanobanana">Nanobanana</option>
+            <option value="kling">Kling</option>
+          </select>
+          <button class="btn secondary" id="copy-btn">프롬프트 복사</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ===== 1) SceneSchema → 프롬프트 빌더 (규칙 기반) =====
+    function buildPromptFromScene(scene) {
+      const subjects = scene.subjects || [];
+      const primary_action = scene.primary_action || {};
+      const location = scene.location || {};
+      const environment = scene.environment || {};
+      const camera = scene.camera || {};
+      const lighting = scene.lighting || {};
+      const mood = scene.mood || {};
+      const styleControl = scene.styleControl || {
+        stylePreset: "unspecified",
+        allow_stylization: false,
+        required_keywords_en: [],
+        forbidden_keywords_en: []
+      };
+
+      const subjectDescriptions = subjects
+        .filter((s) => s.type === "human")
+        .map((s) => s.description_en || "a person")
+        .join(" and ") || "two people";
+
+      const relationship = scene.relationship || "unspecified";
+      const relationshipPhrase =
+        relationship === "couple"
+          ? "who seem like a couple"
+          : relationship === "friends"
+          ? "who seem like close friends"
+          : relationship === "family"
+          ? "who seem like family"
+          : "";
+
+      const actionLineParts = [
+        primary_action.main_verb_en,
+        primary_action.detail_en,
+        primary_action.emotional_change_en ? "their mood shifts " + primary_action.emotional_change_en : ""
+      ].filter(Boolean);
+      const actionLine = actionLineParts.join(", ");
+
+      const locationText =
+        location.detail_en ||
+        location.name_en ||
+        "an urban outdoor location";
+
+      let timeOfDayText = "";
+      switch (environment.timeOfDay) {
+        case "night": timeOfDayText = "at night"; break;
+        case "golden_hour": timeOfDayText = "during golden hour"; break;
+        case "day": timeOfDayText = "during the day"; break;
+        case "dawn": timeOfDayText = "at dawn"; break;
+        case "dusk": timeOfDayText = "at dusk"; break;
+        default: timeOfDayText = "";
+      }
+
+      const atmosphereText = environment.atmosphere_en || "";
+      let colorGradingText = "naturalistic color grading";
+      switch (environment.colorGrading) {
+        case "warm":
+          colorGradingText = "warm color grading with natural skin tones"; break;
+        case "teal_orange":
+          colorGradingText = "subtle teal and orange color grading"; break;
+        case "monochrome":
+          colorGradingText = "soft monochrome grading"; break;
+        case "vibrant":
+          colorGradingText = "vibrant but cinematic color grading"; break;
+        case "muted":
+          colorGradingText = "muted, understated color grading"; break;
+      }
+
+      const shotTextMap = {
+        extreme_close_up: "an extreme close-up shot",
+        close_up: "a close-up shot",
+        medium: "a medium two-shot",
+        medium_wide: "a medium wide shot",
+        wide: "a wide shot",
+        long: "a long shot"
+      };
+      const movementTextMap = {
+        static: "from a static camera",
+        pan: "with a gentle pan",
+        tilt: "with a slow tilt",
+        dolly_in: "with a slow dolly in toward them",
+        dolly_out: "with a slow dolly out",
+        truck: "with a subtle sideways truck move",
+        arc: "with a slow arcing movement around them",
+        crane: "with a slow crane movement",
+        handheld: "with a slightly handheld, natural feel",
+        unspecified: ""
+      };
+
+      const shotText = shotTextMap[camera.shot] || "a medium shot";
+      const movementText = movementTextMap[camera.movement || "unspecified"] || "";
+      const depthText = camera.depthOfField_en || "natural depth of field";
+
+      let lightingDescription = lighting.description_en;
+      if (!lightingDescription) {
+        switch (lighting.style) {
+          case "natural":
+            lightingDescription = "natural, soft lighting"; break;
+          case "low_key":
+            lightingDescription = "low key lighting with strong contrast and deep shadows"; break;
+          case "high_key":
+            lightingDescription = "bright, high key lighting with soft shadows"; break;
+          case "golden_hour":
+            lightingDescription = "warm golden hour light"; break;
+          case "volumetric":
+            lightingDescription = "dramatic volumetric lighting with visible light beams"; break;
+          default:
+            lightingDescription = "cinematic lighting";
+        }
+      }
+
+      const requiredKeywords = (styleControl.required_keywords_en || []).join(", ");
+      const forbiddenKeywords = (styleControl.forbidden_keywords_en || []).join(", ");
+
+      let stylePresetText;
+      switch (styleControl.stylePreset) {
+        case "korean_urban_romance_film":
+          stylePresetText = "A cinematic still frame from a modern Korean urban romance film, shot on 35mm."; break;
+        case "korean_indie_drama":
+          stylePresetText = "A quiet, cinematic still from a Korean indie drama."; break;
+        case "hollywood_blockbuster":
+          stylePresetText = "A cinematic still from a Hollywood film."; break;
+        case "documentary":
+          stylePresetText = "A realistic still from a documentary film."; break;
+        default:
+          stylePresetText = "A cinematic film still.";
+      }
+
+      const moodText = mood && mood.tone_en ? mood.tone_en : "";
+
+      const lines = [];
+      lines.push(stylePresetText);
+      lines.push("");
+      lines.push(
+        shotText +
+          " of " +
+          subjectDescriptions +
+          (relationshipPhrase ? ", " + relationshipPhrase : "") +
+          ", at " +
+          locationText +
+          (timeOfDayText ? " " + timeOfDayText : "") +
+          "."
+      );
+      if (actionLine) lines.push(actionLine + ".");
+      lines.push(
+        lightingDescription +
+          ", " +
+          depthText +
+          (atmosphereText ? ", " + atmosphereText : "") +
+          ", " +
+          colorGradingText +
+          "."
+      );
+      if (moodText) lines.push(moodText + ".");
+      if (requiredKeywords) lines.push(requiredKeywords + ".");
+      if (forbiddenKeywords) lines.push(forbiddenKeywords + ".");
+      return lines.join("\n");
+    }
+
+    // ===== 2) Groq: 한국어 → SceneSchema JSON =====
+    async function koreanToSceneSchemaGroq(koreanText, apiKey) {
+      const systemPrompt = `
+You are a scene parser for a cinematic image prompt generator.
+The user will give you a short scene description in Korean.
+You MUST respond with a single JSON object that matches this interface:
+
+interface SceneSchema {
+  original_text_ko: string;
+  subjects: {
+    id: string;
+    type: "human" | "animal" | "object" | "vehicle" | "other";
+    role?: string;
+    ageGroup?: "teens" | "20s" | "30s" | "40s" | "50s_plus";
+    gender?: "male" | "female" | "non_binary" | "unknown";
+    ethnicity?: "Korean" | "East_Asian" | "Western" | "Other" | "Unknown";
+    description_en?: string;
+  }[];
+  relationship?: "friends" | "couple" | "colleagues" | "family" | "strangers" | "unspecified";
+  primary_action: {
+    main_verb_en: string;
+    detail_en?: string;
+    motion_intensity?: "subtle" | "moderate" | "intense";
+    emotional_change_en?: string;
+  };
+  location: {
+    name_en?: string;
+    type?: "street" | "indoor_bar" | "outdoor_terrace" | "restaurant" | "apartment" | "office" | "other";
+    detail_en?: string;
+  };
+  environment: {
+    timeOfDay: "day" | "night" | "golden_hour" | "dawn" | "dusk" | "unspecified";
+    weather: "clear" | "rainy" | "foggy" | "snowy" | "overcast" | "unspecified";
+    atmosphere_en?: string;
+    colorGrading: "neutral" | "warm" | "cool" | "teal_orange" | "monochrome" | "vibrant" | "muted" | "unspecified";
+  };
+  camera: {
+    shot: "extreme_close_up" | "close_up" | "medium" | "medium_wide" | "wide" | "long";
+    angle: "eye_level" | "high_angle" | "low_angle" | "dutch_angle" | "top_down" | "unspecified";
+    movement: "static" | "pan" | "tilt" | "dolly_in" | "dolly_out" | "truck" | "arc" | "crane" | "handheld" | "unspecified";
+    lens_mm?: number;
+    depthOfField_en?: string;
+  };
+  lighting: {
+    style: "natural" | "high_key" | "low_key" | "golden_hour" | "volumetric" | "rembrandt" | "neon" | "unspecified";
+    description_en?: string;
+  };
+  mood?: {
+    tone_en?: string;
+    pacing_en?: string;
+  };
+  styleControl: {
+    stylePreset: "korean_urban_romance_film" | "korean_indie_drama" | "hollywood_blockbuster" | "documentary" | "anime" | "photoreal" | "unspecified";
+    allow_stylization: boolean;
+    required_keywords_en: string[];
+    forbidden_keywords_en: string[];
+  };
+}
+
+Focus on realistic Korean film style (not anime, not hyper-realistic plastic skin).
+Return ONLY the JSON, with no explanation.`;
+
+      const userPrompt = `한국어 장면 설명: "${koreanText}"`;
+
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + apiKey
+        },
+        body: JSON.stringify({
+          model: "llama-3.1-70b-versatile",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
+          ],
+          temperature: 0.3
+        })
+      });
+
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error("Groq error: " + txt);
+      }
+
+      const data = await res.json();
+      const content = data.choices?.[0]?.message?.content || "{}";
+      return JSON.parse(content);
+    }
+
+    // ===== 3) UI 연결 =====
+    const koInput = document.getElementById("ko-input");
+    const generateBtn = document.getElementById("generate-btn");
+    const sceneJson = document.getElementById("scene-json");
+    const promptOutput = document.getElementById("prompt-output");
+    const statusLeft = document.getElementById("status-left");
+    const statusRight = document.getElementById("status-right");
+    const copyBtn = document.getElementById("copy-btn");
+    const groqKeyInput = document.getElementById("groq-key");
+
+    function setStatus(el, text, isError) {
+      el.textContent = text;
+      if (isError) el.classList.add("error");
+      else el.classList.remove("error");
+    }
+
+    generateBtn.addEventListener("click", async () => {
+      const text = koInput.value.trim();
+      if (!text) {
+        setStatus(statusLeft, "한국어 장면 설명을 먼저 입력하세요.", true);
+        return;
+      }
+      const apiKey = groqKeyInput.value.trim();
+      if (!apiKey) {
+        setStatus(statusLeft, "Groq API 키를 입력해주세요.", true);
+        return;
+      }
+
+      sceneJson.value = "";
+      promptOutput.textContent = "";
+      setStatus(statusLeft, "Groq로 SceneSchema 생성 중...", false);
+      setStatus(statusRight, "LLM 응답을 기다리는 중...", false);
+
+      try {
+        const scene = await koreanToSceneSchemaGroq(text, apiKey);
+        sceneJson.value = JSON.stringify(scene, null, 2);
+        const prompt = buildPromptFromScene(scene);
+        promptOutput.textContent = prompt;
+        setStatus(statusLeft, "SceneSchema 생성 완료.", false);
+        setStatus(statusRight, "프롬프트 생성 완료.", false);
+      } catch (e) {
+        setStatus(statusLeft, "SceneSchema 생성 실패: " + e.message, true);
+        setStatus(statusRight, "프롬프트 생성 실패.", true);
+      }
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      const text = promptOutput.textContent || "";
+      if (!text.trim()) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        setStatus(statusRight, "프롬프트를 클립보드에 복사했습니다.", false);
+      } catch {
+        setStatus(statusRight, "클립보드 복사 실패.", true);
+      }
+    });
+  </script>
+</body>
+</html>
