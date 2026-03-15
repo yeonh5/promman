@@ -4,65 +4,75 @@
   <meta charset="UTF-8" />
   <title>promman – Groq prototype</title>
   <style>
+    * {
+      caret-color: transparent;
+    }
+    input,
+    textarea {
+      caret-color: #e5e7eb;
+    }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
     body {
       margin: 0;
       padding: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: #020617;
       color: #e5e7eb;
-      height: 100vh;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
     header {
-      padding: 20px 16px 12px;
-      background: #020617;
-      border-bottom: 1px solid #1f2937;
+      padding: 20px 16px 16px;
+      background: #000000;
+      border-bottom: 1px solid #111827;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 8px;
     }
-    .logo-mark {
-      width: 40px;
-      height: 40px;
-      border-radius: 999px;
-      border: 1px solid #1f2937;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 20px;
-      color: #3b82f6;
-      background: radial-gradient(circle at 30% 0%, #1d4ed8, #020617);
-      box-shadow: 0 0 0 1px rgba(15,23,42,0.9), 0 18px 40px rgba(15,23,42,0.9);
+    .logo-image {
+      width: 360px;
+      max-width: 95vw;
+      border-radius: 0;
+      overflow: hidden;
+    }
+    .logo-image img {
+      display: block;
+      width: 100%;
+      height: auto;
     }
     header h1 {
-      font-size: 18px;
-      margin: 0;
-      font-weight: 800;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
+      display: none;
     }
-    header h1 span { color: #3b82f6; }
-    header span.sub {
-      font-size: 12px;
-      color: #9ca3af;
-      text-align: center;
-    }
+    header span.sub { display: none; }
     main {
       flex: 1;
       display: grid;
       grid-template-columns: 1.4fr 1fr;
       min-height: 0;
+      overflow: hidden;
     }
     .column {
       display: flex;
       flex-direction: column;
       min-width: 0;
-      border-left: 1px solid #1f2937;
+      border-left: 1px solid #111827;
     }
     .column:first-child { border-left: none; }
+    .column:nth-child(2) {
+      overflow-y: auto;
+      min-height: 0;
+    }
+    .director-controls-inner {
+      width: 100%;
+      min-width: 0;
+    }
 
     .section-header {
       padding: 8px 12px;
@@ -70,8 +80,8 @@
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: #9ca3af;
-      border-bottom: 1px solid #1f2937;
-      background: #020617;
+      border-bottom: 1px solid #111827;
+      background: #000000;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -101,7 +111,7 @@
 
     .ko-input-wrapper {
       padding: 10px 12px;
-      border-bottom: 1px solid #1f2937;
+      border-bottom: 1px solid #111827;
     }
     .ko-row {
       display: flex;
@@ -145,6 +155,7 @@
 
     .output {
       flex: 1;
+      min-height: 0;
       padding: 12px;
       background: #020617;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -157,7 +168,7 @@
     .footer {
       padding: 8px 12px;
       border-top: 1px solid #1f2937;
-      background: #020617;
+      background: #000000;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -167,6 +178,75 @@
       display: flex;
       gap: 8px;
       align-items: center;
+      user-select: none;
+    }
+
+    .pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .pill-button {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #9ca3af;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+    .pill-button:hover {
+      background: #111827;
+      color: #e5e7eb;
+    }
+    .pill-button.active {
+      background: #3b82f6;
+      border-color: #3b82f6;
+      color: #ffffff;
+    }
+    .shot-thumb-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 4px;
+      width: 100%;
+      min-width: 0;
+    }
+    .shot-thumb {
+      background: #020617;
+      border-radius: 10px;
+      border: 1px solid #1f2937;
+      padding: 4px;
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    }
+    .shot-thumb img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      border-radius: 8px;
+      display: block;
+    }
+    .shot-thumb span {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #d1d5db;
+    }
+    .shot-thumb.active {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 1px rgba(59,130,246,0.6);
+      transform: translateY(-1px);
     }
     .select {
       background: #020617;
@@ -180,17 +260,49 @@
       font-size: 10px;
       padding: 2px 6px;
       border-radius: 999px;
-      background: #111827;
+      background: #000000;
       border: 1px solid #374151;
       color: #9ca3af;
     }
+    .persona-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0;
+      border-radius: 999px;
+      background: #020617;
+      border: 1px solid #374151;
+      overflow: hidden;
+    }
+    .persona-remove {
+      width: 18px;
+      height: 18px;
+      padding: 0;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: #6b7280;
+      font-size: 12px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .persona-remove:hover {
+      background: #111827;
+      color: #f97373;
+    }
+
   </style>
 </head>
 <body>
   <header>
-    <div class="logo-mark">P</div>
+    <div class="logo-image">
+      <img src="promman-hero.png" alt="PROMMAN hero image">
+    </div>
     <h1><span>prom</span>man</h1>
-    <span class="sub">한국어 장면을 영화 스틸 프롬프트로 변환하는 작은 촬영감독 도우미</span>
+    <span class="sub"></span>
   </header>
 
   <main>
@@ -200,10 +312,21 @@
         <span>Generated Cinematic Prompt</span>
         <span class="sub2">영화 스틸 느낌의 영어 프롬프트</span>
       </div>
+      <!-- 페르소나 설정 -->
+      <div class="ko-input-wrapper" style="border-bottom:none; border-top:1px solid #111827;">
+        <div class="status" style="padding-left:0; padding-bottom:4px;">페르소나</div>
+        <div id="persona-row" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+          <div class="persona-item">
+            <input class="persona-input" type="text" placeholder="인물 A" style="padding:4px 8px; border:none; background:transparent; color:#e5e7eb; font-size:12px; min-width:72px;">
+            <button class="persona-remove" type="button" title="삭제">×</button>
+          </div>
+          <button id="persona-add" class="btn secondary" type="button" style="flex-shrink:0; padding:4px 10px; font-size:11px;">+ 사람 추가</button>
+        </div>
+      </div>
       <div class="ko-input-wrapper">
         <div class="ko-row">
           <textarea id="ko-input" placeholder="여기에 장면을 한국어로 적어보세요.&#10;예) 한국 남녀가 풋풋하게 종로 호프에서 맥주를 마시고 있다"></textarea>
-          <button class="btn" id="generate-btn">Groq로 번역</button>
+          <button class="btn" id="generate-btn">프롬프트</button>
         </div>
       </div>
       <div id="prompt-output" class="output"></div>
@@ -226,60 +349,137 @@
         <span>Director Controls</span>
         <span class="sub2">카메라 · 시간 · 감독 톤</span>
       </div>
-      <div style="padding: 10px 12px; display: flex; flex-direction: column; gap: 12px;">
+      <div class="director-controls-inner" style="padding: 10px 12px; display: flex; flex-direction: column; gap: 12px;">
         <!-- 카메라 화각 -->
         <div>
-          <div class="status" style="padding-left:0;">카메라 화각 (Shot)</div>
-          <select id="shot-select" class="select" style="width:100%; margin-top:4px;">
-            <option value="">SceneSchema에 맡기기</option>
-            <option value="extreme_close_up">익스트림 클로즈업</option>
-            <option value="close_up">클로즈업</option>
-            <option value="medium">미디엄 투샷</option>
-            <option value="medium_wide">미디엄 와이드</option>
-            <option value="wide">와이드샷</option>
-            <option value="long">롱샷</option>
-          </select>
+          <div class="status" style="padding-left:0;">카메라 화각 (Shot) · Recommend는 장면 맥락에 따라 LLM이 자동 선택</div>
+          <div id="shot-group" class="shot-thumb-row">
+            <button class="shot-thumb" data-value="">
+              <img src="shot-recommend.png" alt="Recommend shot thumbnail">
+              <span>Recommend</span>
+            </button>
+            <button class="shot-thumb" data-value="extreme_close_up">
+              <img src="shot-extreme-close-up.png" alt="Extreme Close-Up thumbnail">
+              <span>Extreme Close-Up</span>
+            </button>
+            <button class="shot-thumb" data-value="close_up">
+              <img src="shot-close-up.png" alt="Close-Up thumbnail">
+              <span>Close-Up</span>
+            </button>
+            <button class="shot-thumb" data-value="medium_close_up">
+              <img src="shot-medium-close-up.png" alt="Medium Close-Up thumbnail">
+              <span>Medium Close-Up</span>
+            </button>
+            <button class="shot-thumb" data-value="medium">
+              <img src="shot-medium-shot.png" alt="Medium Shot thumbnail">
+              <span>Medium Shot</span>
+            </button>
+            <button class="shot-thumb" data-value="medium_wide">
+              <img src="shot-medium-wide-shot.png" alt="Medium Wide Shot thumbnail">
+              <span>Medium Wide Shot</span>
+            </button>
+            <button class="shot-thumb" data-value="wide">
+              <img src="shot-wide-shot.png" alt="Wide Shot thumbnail">
+              <span>Wide Shot</span>
+            </button>
+            <button class="shot-thumb" data-value="extreme_wide">
+              <img src="shot-extreme-wide-shot.png" alt="Extreme Wide Shot thumbnail">
+              <span>Extreme Wide Shot</span>
+            </button>
+          </div>
         </div>
 
         <!-- 카메라 앵글 -->
         <div>
           <div class="status" style="padding-left:0;">카메라 앵글 (Angle)</div>
-          <select id="angle-select" class="select" style="width:100%; margin-top:4px;">
-            <option value="">SceneSchema에 맡기기</option>
-            <option value="eye_level">아이 레벨</option>
-            <option value="high_angle">하이 앵글</option>
-            <option value="low_angle">로우 앵글</option>
-            <option value="dutch_angle">더치 앵글</option>
-            <option value="top_down">탑다운</option>
-          </select>
+          <div id="angle-group" class="shot-thumb-row">
+            <button class="shot-thumb" data-value="eye_level">
+              <img src="angle-eye-level.png" alt="Eye Level thumbnail">
+              <span>Eye Level</span>
+            </button>
+            <button class="shot-thumb" data-value="low_angle">
+              <img src="angle-low-angle.png" alt="Low Angle thumbnail">
+              <span>Low Angle</span>
+            </button>
+            <button class="shot-thumb" data-value="high_angle">
+              <img src="angle-high-angle.png" alt="High Angle thumbnail">
+              <span>High Angle</span>
+            </button>
+            <button class="shot-thumb" data-value="top_down">
+              <img src="angle-birds-eye-view.png" alt="Bird's Eye View thumbnail">
+              <span>Bird's Eye View</span>
+            </button>
+            <button class="shot-thumb" data-value="worms_eye">
+              <img src="angle-worms-eye-view.png" alt="Worm's Eye View thumbnail">
+              <span>Worm's Eye View</span>
+            </button>
+            <button class="shot-thumb" data-value="dutch_angle">
+              <img src="angle-dutch-angle.png" alt="Dutch Angle thumbnail">
+              <span>Dutch / Canted Angle</span>
+            </button>
+            <button class="shot-thumb" data-value="over_shoulder">
+              <img src="angle-over-the-shoulder.png" alt="Over the Shoulder thumbnail">
+              <span>Over the Shoulder</span>
+            </button>
+            <button class="shot-thumb" data-value="pov">
+              <img src="angle-point-of-view.png" alt="Point of View thumbnail">
+              <span>Point of View</span>
+            </button>
+          </div>
         </div>
 
-        <!-- 시간 / 밤낮 -->
+        <!-- 시간 (새벽·낮·노을·밤) -->
         <div>
-          <div class="status" style="padding-left:0;">시간과 분위기</div>
-          <div style="display:flex; gap:8px; margin-top:4px; align-items:center;">
-            <select id="time-select" class="select" style="flex:1;">
-              <option value="">SceneSchema에 맡기기</option>
-              <option value="day">낮</option>
-              <option value="golden_hour">골든아워</option>
-              <option value="dusk">해질녘</option>
-              <option value="night">밤</option>
-            </select>
-            <input id="clock-range" type="range" min="0" max="23" value="20" style="flex:1;">
-            <span id="clock-label" class="badge">20:00</span>
+          <div class="status" style="padding-left:0;">시간</div>
+          <div id="time-group" class="shot-thumb-row" style="grid-template-columns: repeat(4, 1fr);">
+            <button class="shot-thumb" data-value="dawn">
+              <img src="time-dawn.png" alt="새벽 thumbnail">
+              <span>새벽</span>
+            </button>
+            <button class="shot-thumb" data-value="day">
+              <img src="time-day.png" alt="낮 thumbnail">
+              <span>낮</span>
+            </button>
+            <button class="shot-thumb" data-value="dusk">
+              <img src="time-dusk.png" alt="노을 thumbnail">
+              <span>노을</span>
+            </button>
+            <button class="shot-thumb" data-value="night">
+              <img src="time-night.png" alt="밤 thumbnail">
+              <span>밤</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 날씨 -->
+        <div>
+          <div class="status" style="padding-left:0;">날씨</div>
+          <div id="weather-group" class="shot-thumb-row" style="grid-template-columns: repeat(3, 1fr);">
+            <button class="shot-thumb" data-value="clear">
+              <img src="weather-clear.png" alt="맑음 thumbnail">
+              <span>맑음</span>
+            </button>
+            <button class="shot-thumb" data-value="snowy">
+              <img src="weather-snow.png" alt="눈 thumbnail">
+              <span>눈</span>
+            </button>
+            <button class="shot-thumb" data-value="rainy">
+              <img src="weather-rain.png" alt="비 thumbnail">
+              <span>비</span>
+            </button>
           </div>
         </div>
 
         <!-- 감독 프리셋 -->
         <div>
           <div class="status" style="padding-left:0;">감독 스타일 프리셋</div>
-          <select id="director-select" class="select" style="width:100%; margin-top:4px;">
-            <option value="none">선택 안 함 (SceneSchema 그대로)</option>
-            <option value="park_chan_wook">박찬욱 · 다크하고 정교한 프레이밍</option>
-            <option value="bong_joon_ho">봉준호 · 현실감+사회적 긴장</option>
-            <option value="greta_gerwig">그레타 거윅 · 밝고 따뜻한 청춘</option>
-            <option value="nolan">크리스토퍼 놀란 · 스케일 큰 서사와 극적 대비</option>
-          </select>
+          <div id="director-group" class="pill-group">
+            <button class="pill-button active" data-value="none">없음</button>
+            <button class="pill-button" data-value="park_chan_wook">박찬욱</button>
+            <button class="pill-button" data-value="bong_joon_ho">봉준호</button>
+            <button class="pill-button" data-value="greta_gerwig">그레타 거윅</button>
+            <button class="pill-button" data-value="nolan">크리스토퍼 놀란</button>
+          </div>
         </div>
       </div>
     </section>
@@ -337,6 +537,16 @@
         case "dawn": timeOfDayText = "at dawn"; break;
         case "dusk": timeOfDayText = "at dusk"; break;
         default: timeOfDayText = "";
+      }
+
+      let weatherText = "";
+      switch (environment.weather) {
+        case "clear": weatherText = "clear weather"; break;
+        case "rainy": weatherText = "in the rain"; break;
+        case "snowy": weatherText = "in the snow"; break;
+        case "foggy": weatherText = "foggy"; break;
+        case "overcast": weatherText = "overcast"; break;
+        default: weatherText = "";
       }
 
       const atmosphereText = environment.atmosphere_en || "";
@@ -418,6 +628,9 @@
 
       const lines = [];
       lines.push(stylePresetText);
+      if (scene.personas && Array.isArray(scene.personas) && scene.personas.length) {
+        lines.push("Characters: " + scene.personas.join(", ") + ".");
+      }
       lines.push("");
       lines.push(
         shotText +
@@ -427,6 +640,7 @@
           ", at " +
           locationText +
           (timeOfDayText ? " " + timeOfDayText : "") +
+          (weatherText ? ", " + weatherText : "") +
           "."
       );
       if (actionLine) lines.push(actionLine + ".");
@@ -470,12 +684,19 @@
     const promptOutput = document.getElementById("prompt-output");
     const statusRight = document.getElementById("status-right");
     const copyBtn = document.getElementById("copy-btn");
-    const shotSelect = document.getElementById("shot-select");
-    const angleSelect = document.getElementById("angle-select");
-    const timeSelect = document.getElementById("time-select");
-    const clockRange = document.getElementById("clock-range");
-    const clockLabel = document.getElementById("clock-label");
-    const directorSelect = document.getElementById("director-select");
+    const shotGroup = document.getElementById("shot-group");
+    const angleGroup = document.getElementById("angle-group");
+    const timeGroup = document.getElementById("time-group");
+    const weatherGroup = document.getElementById("weather-group");
+    const directorGroup = document.getElementById("director-group");
+    const personaRow = document.getElementById("persona-row");
+    const personaAddBtn = document.getElementById("persona-add");
+
+    let shotOverride = "";
+    let angleOverride = "";
+    let timeOverride = "";
+    let weatherOverride = "";
+    let directorOverride = "none";
 
     function setStatusRight(text, isError) {
       setStatus(statusRight, text, isError);
@@ -488,7 +709,7 @@
     }
 
     function applyDirectorOverrides(scene) {
-      const override = directorSelect.value;
+      const override = directorOverride;
       if (!override || override === "none") return scene;
 
       scene.styleControl = scene.styleControl || {
@@ -529,24 +750,103 @@
       scene.camera = scene.camera || {};
       scene.environment = scene.environment || {};
 
-      if (shotSelect.value) {
-        scene.camera.shot = shotSelect.value;
+      if (shotOverride) {
+        scene.camera.shot = shotOverride;
       }
-      if (angleSelect.value) {
-        scene.camera.angle = angleSelect.value;
+      if (angleOverride) {
+        scene.camera.angle = angleOverride;
       }
-      if (timeSelect.value) {
-        scene.environment.timeOfDay = timeSelect.value;
+      if (timeOverride) {
+        scene.environment.timeOfDay = timeOverride;
+      }
+      if (weatherOverride) {
+        scene.environment.weather = weatherOverride;
       }
 
       return scene;
     }
 
-    clockRange.addEventListener("input", () => {
-      const h = parseInt(clockRange.value, 10) || 0;
-      const label = `${String(h).padStart(2, "0")}:00`;
-      clockLabel.textContent = label;
-    });
+    function setupPillGroup(groupEl, onChange, initialValue) {
+      if (!groupEl) return;
+      const buttons = Array.from(groupEl.querySelectorAll(".pill-button, .shot-thumb"));
+      if (initialValue !== undefined) {
+        buttons.forEach((btn) => {
+          if ((btn.getAttribute("data-value") || "") === initialValue) {
+            btn.classList.add("active");
+          } else {
+            btn.classList.remove("active");
+          }
+        });
+      }
+      groupEl.addEventListener("click", (e) => {
+        let target = e.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (target.closest(".shot-thumb")) {
+          target = target.closest(".shot-thumb");
+        }
+        if (!target.classList.contains("pill-button") && !target.classList.contains("shot-thumb")) return;
+        e.preventDefault();
+        const val = target.getAttribute("data-value") || "";
+        buttons.forEach((btn) => {
+          if (btn === target) btn.classList.add("active");
+          else btn.classList.remove("active");
+        });
+        onChange(val);
+      });
+    }
+
+    setupPillGroup(shotGroup, (val) => { shotOverride = val; }, shotOverride);
+    setupPillGroup(angleGroup, (val) => { angleOverride = val; }, angleOverride);
+    setupPillGroup(timeGroup, (val) => { timeOverride = val; }, timeOverride);
+    setupPillGroup(weatherGroup, (val) => { weatherOverride = val; }, weatherOverride);
+    setupPillGroup(directorGroup, (val) => { directorOverride = val || "none"; }, directorOverride);
+
+    function getPersonas() {
+      if (!personaRow) return [];
+      const inputs = Array.from(personaRow.querySelectorAll(".persona-input"));
+      return inputs
+        .map((el) => (el.value || "").trim())
+        .filter((v) => v.length > 0);
+    }
+
+    if (personaAddBtn && personaRow) {
+      personaRow.addEventListener("click", (e) => {
+        const removeBtn = e.target && e.target.classList && e.target.classList.contains("persona-remove");
+        if (removeBtn) {
+          e.preventDefault();
+          const item = e.target.closest(".persona-item");
+          if (item && personaRow.querySelectorAll(".persona-item").length > 1) {
+            item.remove();
+          }
+        }
+      });
+      personaAddBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const count = personaRow.querySelectorAll(".persona-input").length;
+        const label = String.fromCharCode(65 + count);
+        const item = document.createElement("div");
+        item.className = "persona-item";
+        const input = document.createElement("input");
+        input.className = "persona-input";
+        input.type = "text";
+        input.placeholder = "인물 " + label;
+        input.style.padding = "4px 8px";
+        input.style.border = "none";
+        input.style.background = "transparent";
+        input.style.color = "#e5e7eb";
+        input.style.fontSize = "12px";
+        input.style.minWidth = "72px";
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "persona-remove";
+        removeBtn.type = "button";
+        removeBtn.title = "삭제";
+        removeBtn.textContent = "×";
+        item.appendChild(input);
+        item.appendChild(removeBtn);
+        personaRow.insertBefore(item, personaAddBtn);
+        input.focus();
+      });
+    }
 
     generateBtn.addEventListener("click", async () => {
       const text = koInput.value.trim();
@@ -560,6 +860,10 @@
 
       try {
         let scene = await koreanToSceneSchemaGroq(text);
+        const personas = getPersonas();
+        if (personas.length) {
+          scene.personas = personas;
+        }
         scene = applyCameraOverrides(scene);
         scene = applyDirectorOverrides(scene);
         const prompt = buildPromptFromScene(scene);
