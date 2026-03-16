@@ -721,34 +721,40 @@
       lines.push("");
 
       lines.push("--- SCENE / ACTION ---");
+      const isActionGenre = ["gritty_noir", "thriller"].includes(genre);
+      const isRomanceGenre = ["dreamy_romance", "coming_of_age"].includes(genre);
       let cameraIntent = "";
       switch (camera.angle) {
         case "low_angle":
-          cameraIntent = "A dramatic low angle from near the ground that makes the character feel powerful and imposing."; break;
+          cameraIntent = "The camera is positioned very low near the ground, looking up at a dramatic angle toward the characters."; break;
         case "high_angle":
-          cameraIntent = "A high angle looking down that makes the character feel small and vulnerable."; break;
+          cameraIntent = "The camera looks down from high above, making the characters appear smaller in the space."; break;
         case "pov":
-          cameraIntent = "A point-of-view shot that puts the viewer directly in the character's perspective."; break;
+          cameraIntent = "The shot is from a point-of-view perspective, as if seen directly through the character's eyes."; break;
         case "top_down":
         case "birds_eye_view":
-          cameraIntent = "A bird's eye view from directly above that flattens the space beneath."; break;
+          cameraIntent = "The camera is directly above, flattening the space below in a bird's eye view."; break;
         case "worms_eye":
         case "worms_eye_view":
-          cameraIntent = "An extreme low, worm's eye view that exaggerates the subject towering above the camera."; break;
+          cameraIntent = "The camera is extremely low, in a worm's eye view that exaggerates the vertical scale of the scene."; break;
         default:
           cameraIntent = "";
       }
-      const actionSentence = (actionLine || "figures in frame.") + (cameraIntent ? " " + cameraIntent : "");
-      lines.push((relationshipPhrase ? relationshipPhrase + ". " : "") + actionSentence);
+      let actionSentence = actionLine || "figures in frame.";
+      if (isRomanceGenre && camera.angle === "low_angle") {
+        actionSentence = `${subjectDescriptions} look at each other with soft, warm expressions, leaning slightly toward one another as if sharing a private moment.`;
+      }
+      const sceneSentence = actionSentence + (cameraIntent ? " " + cameraIntent : "");
+      lines.push((relationshipPhrase ? relationshipPhrase + ". " : "") + sceneSentence);
       lines.push("");
 
       lines.push("--- LOCATION ---");
       let horizonLine = "";
       switch (camera.angle) {
         case "low_angle":
-          horizonLine = "The horizon line is very low in the frame, with a vast sky filling the background."; break;
+          horizonLine = "The horizon is pushed to the bottom of the frame to emphasize the vast sky."; break;
         case "high_angle":
-          horizonLine = "The ground fills most of the frame, with almost no horizon visible."; break;
+          horizonLine = "The ground fills most of the frame, with almost no horizon visible near the top of the image."; break;
         default:
           horizonLine = "";
       }
@@ -762,13 +768,18 @@
 
       lines.push("--- LIGHTING ---");
       let angleLighting = "";
-      switch (camera.angle) {
-        case "low_angle":
-          angleLighting = "Harsh under-lighting and strong rim light emphasize the low angle."; break;
-        case "high_angle":
-          angleLighting = "Soft overhead light reinforces the high viewpoint from above."; break;
-        default:
-          angleLighting = "";
+      if (isRomanceGenre) {
+        angleLighting =
+          "Soft, cinematic golden hour-style glow wraps around the figures. Use a warm rim light to separate them gently from the background, with no harsh shadows on faces.";
+      } else {
+        switch (camera.angle) {
+          case "low_angle":
+            angleLighting = "Use dramatic under-lighting and high contrast shadows to reinforce the powerful low angle."; break;
+          case "high_angle":
+            angleLighting = "Soft overhead light reinforces the high viewpoint from above."; break;
+          default:
+            angleLighting = "";
+        }
       }
       const lightingSentence =
         lightingDescription +
@@ -823,6 +834,7 @@
     const promptOutput = document.getElementById("prompt-output");
     const statusRight = document.getElementById("status-right");
     const copyBtn = document.getElementById("copy-btn");
+    const modelSelect = document.getElementById("model-select");
     const genreGroup = document.getElementById("genre-group");
     const shotGroup = document.getElementById("shot-group");
     const angleGroup = document.getElementById("angle-group");
@@ -939,6 +951,34 @@
       });
     }
 
+    // 나노 바나나 등 특정 모델용 프롬프트 후처리
+    function postProcessPromptForModel(prompt, options) {
+      const { model, genre, cameraAngle } = options || {};
+      let out = prompt;
+
+      const isRomanceGenre = ["dreamy_romance", "coming_of_age"].includes(genre);
+
+      // 1) 로맨스/청춘 장르: 거친 단어 제거 후 부드러운 톤 보강
+      if (model === "nanobanana" && isRomanceGenre) {
+        out = out.replace(/\b(harsh|aggressive|grim|violent|menacing)\b/gi, "");
+        if (!/dreamy/gi.test(out)) {
+          out += "\nDreamy, soft, gentle romantic atmosphere.";
+        }
+      }
+
+      // 2) 로우 앵글일 때 카메라 위치/각도 문구를 강하게 유지
+      if (model === "nanobanana" && cameraAngle === "low_angle") {
+        if (!/very low near the ground/gi.test(out)) {
+          out = out.replace(
+            /The camera is positioned[^.]*\./i,
+            "The camera is positioned very low near the ground, looking up at a dramatic angle toward the characters."
+          );
+        }
+      }
+
+      return out;
+    }
+
     setupPillGroup(genreGroup, (val) => { genreOverride = val; }, genreOverride);
     setupPillGroup(shotGroup, (val) => { shotOverride = val; }, shotOverride);
     setupPillGroup(angleGroup, (val) => { angleOverride = val; }, angleOverride);
@@ -1012,7 +1052,18 @@
         scene = applyCameraOverrides(scene);
         scene = applyDirectorOverrides(scene);
         const prompt = buildPromptFromScene(scene);
-        promptOutput.textContent = prompt;
+
+        const model = modelSelect ? (modelSelect.value || "generic") : "generic";
+        const finalPrompt =
+          model === "nanobanana"
+            ? postProcessPromptForModel(prompt, {
+                model,
+                genre: scene.genrePreset || "auto",
+                cameraAngle: scene.camera && scene.camera.angle
+              })
+            : prompt;
+
+        promptOutput.textContent = finalPrompt;
         setStatusRight("SceneSchema · 프롬프트 생성 완료.", false);
       } catch (e) {
         setStatusRight("SceneSchema 생성 실패: " + e.message, true);

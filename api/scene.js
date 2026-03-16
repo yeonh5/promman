@@ -87,6 +87,15 @@ interface SceneSchema {
   };
 }
 
+When the Korean text contains subjective or vague adjectives like "잘생긴", "예쁜", "멋진", "귀여운", "섹시한", "무서운", "센치한", etc., you MUST convert them into concrete, visual, physical or behavioral descriptions in English.
+NEVER leave purely subjective words in English like "handsome", "pretty", "cool", "sexy", "scary", "cute" without also giving specific details.
+Always rewrite them as detailed descriptions, for example:
+- "잘생긴 남자" -> "a young man with a sharp jawline, clear skin, and well-defined features"
+- "예쁜 여자" -> "a woman with bright eyes, smooth skin, and delicate facial features"
+- "귀여운 표정" -> "a playful expression with slightly raised cheeks and a soft smile"
+- "무서운 눈빛" -> "a piercing stare with eyebrows slightly lowered and eyes narrowed"
+Apply this rule consistently to all people and objects so that description_en and other *_en fields are concrete and specific enough to draw.
+
 Focus on realistic Korean film style (not anime, not hyper-realistic plastic skin).
 Return ONLY the JSON, with no explanation.`;
 
