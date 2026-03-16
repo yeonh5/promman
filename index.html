@@ -210,16 +210,16 @@
     .shot-thumb-row {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
+      gap: 6px;
       margin-top: 4px;
       width: 100%;
       min-width: 0;
     }
     .shot-thumb {
       background: #020617;
-      border-radius: 10px;
+      border-radius: 8px;
       border: 1px solid #1f2937;
-      padding: 4px;
+      padding: 3px;
       width: 100%;
       min-width: 0;
       box-sizing: border-box;
@@ -233,14 +233,15 @@
     .shot-thumb img {
       width: 100%;
       height: auto;
-      aspect-ratio: 16 / 10;
+      aspect-ratio: 4 / 3;
+      max-height: 64px;
       object-fit: cover;
-      border-radius: 8px;
+      border-radius: 6px;
       display: block;
     }
     .shot-thumb span {
-      margin-top: 4px;
-      font-size: 11px;
+      margin-top: 3px;
+      font-size: 10px;
       color: #d1d5db;
     }
     .shot-thumb.active {
@@ -310,7 +311,7 @@
     <section class="column">
       <div class="section-header">
         <span>Generated Cinematic Prompt</span>
-        <span class="sub2">영화 스틸 느낌의 영어 프롬프트</span>
+        <span class="sub2">시네마틱 프롬프트 번역기</span>
       </div>
       <!-- 페르소나 설정 -->
       <div class="ko-input-wrapper" style="border-bottom:none; border-top:1px solid #111827;">
@@ -347,9 +348,22 @@
     <section class="column">
       <div class="section-header">
         <span>Director Controls</span>
-        <span class="sub2">카메라 · 시간 · 감독 톤</span>
+        <span class="sub2">장르 · 카메라 · 시간</span>
       </div>
-      <div class="director-controls-inner" style="padding: 10px 12px; display: flex; flex-direction: column; gap: 12px;">
+      <div class="director-controls-inner" style="padding: 10px 12px; display: flex; flex-direction: column; gap: 10px;">
+        <!-- 장르 / 무드 -->
+        <div>
+          <div class="status" style="padding-left:0;">장르 / 무드</div>
+          <div id="genre-group" class="pill-group">
+            <button class="pill-button active" data-value="">Auto</button>
+            <button class="pill-button" data-value="coming_of_age">Coming-of-age youth drama</button>
+            <button class="pill-button" data-value="dreamy_romance">Dreamy romance</button>
+            <button class="pill-button" data-value="gritty_noir">Gritty urban noir</button>
+            <button class="pill-button" data-value="slice_of_life">Quiet slice-of-life</button>
+            <button class="pill-button" data-value="thriller">Tense cinematic thriller</button>
+          </div>
+        </div>
+
         <!-- 카메라 화각 -->
         <div>
           <div class="status" style="padding-left:0;">카메라 화각 (Shot) · Recommend는 장면 맥락에 따라 LLM이 자동 선택</div>
@@ -627,8 +641,39 @@
         }
       }
 
-      const requiredKeywords = (styleControl.required_keywords_en || []).join(", ");
-      const forbiddenKeywords = (styleControl.forbidden_keywords_en || []).join(", ");
+      const requiredKeywordsArr = Array.isArray(styleControl.required_keywords_en)
+        ? styleControl.required_keywords_en.slice()
+        : [];
+      const forbiddenKeywordsArr = Array.isArray(styleControl.forbidden_keywords_en)
+        ? styleControl.forbidden_keywords_en.slice()
+        : [];
+
+      // 장르 오버라이드: 선택된 장르에 따라 톤·스타일 키워드를 극단적으로 고정
+      const genre = scene.genrePreset || "auto";
+      if (!scene.mood) scene.mood = {};
+      switch (genre) {
+        case "coming_of_age":
+          scene.mood.tone_en = "coming-of-age Korean youth drama";
+          requiredKeywordsArr.push("naturalistic acting", "subtle emotions", "warm but realistic tone");
+          break;
+        case "dreamy_romance":
+          scene.mood.tone_en = "dreamy, soft Korean romance film";
+          requiredKeywordsArr.push("soft focus", "pastel colors", "gentle romantic atmosphere");
+          break;
+        case "gritty_noir":
+          scene.mood.tone_en = "gritty urban noir";
+          colorGradingText = "dark, contrasty noir-inspired grading";
+          requiredKeywordsArr.push("low key lighting", "urban night streets", "grainy texture");
+          break;
+        case "slice_of_life":
+          scene.mood.tone_en = "quiet slice-of-life realism";
+          requiredKeywordsArr.push("simple everyday setting", "unaffected naturalism");
+          break;
+        case "thriller":
+          scene.mood.tone_en = "tense, suspenseful cinematic thriller";
+          requiredKeywordsArr.push("high contrast lighting", "heightened tension", "tight framing");
+          break;
+      }
 
       let stylePresetText;
       switch (styleControl.stylePreset) {
@@ -645,10 +690,18 @@
       }
 
       const moodText = mood && mood.tone_en ? mood.tone_en : "";
+      const requiredKeywords = requiredKeywordsArr.join(", ");
+      const forbiddenKeywords = forbiddenKeywordsArr.join(", ");
 
       const lines = [];
       lines.push(stylePresetText);
       lines.push("");
+
+      if (genre && genre !== "auto") {
+        lines.push("--- GENRE ---");
+        lines.push(genre);
+        lines.push("");
+      }
 
       // --- 섹션 구분: 각 블록이 하나의 역할만 담당해 상충·무시 방지 ---
       lines.push("--- SHOT ---");
@@ -668,11 +721,38 @@
       lines.push("");
 
       lines.push("--- SCENE / ACTION ---");
-      lines.push((relationshipPhrase ? relationshipPhrase + ". " : "") + (actionLine || "figures in frame."));
+      let cameraIntent = "";
+      switch (camera.angle) {
+        case "low_angle":
+          cameraIntent = "A dramatic low angle from near the ground that makes the character feel powerful and imposing."; break;
+        case "high_angle":
+          cameraIntent = "A high angle looking down that makes the character feel small and vulnerable."; break;
+        case "pov":
+          cameraIntent = "A point-of-view shot that puts the viewer directly in the character's perspective."; break;
+        case "top_down":
+        case "birds_eye_view":
+          cameraIntent = "A bird's eye view from directly above that flattens the space beneath."; break;
+        case "worms_eye":
+        case "worms_eye_view":
+          cameraIntent = "An extreme low, worm's eye view that exaggerates the subject towering above the camera."; break;
+        default:
+          cameraIntent = "";
+      }
+      const actionSentence = (actionLine || "figures in frame.") + (cameraIntent ? " " + cameraIntent : "");
+      lines.push((relationshipPhrase ? relationshipPhrase + ". " : "") + actionSentence);
       lines.push("");
 
       lines.push("--- LOCATION ---");
-      lines.push(locationText);
+      let horizonLine = "";
+      switch (camera.angle) {
+        case "low_angle":
+          horizonLine = "The horizon line is very low in the frame, with a vast sky filling the background."; break;
+        case "high_angle":
+          horizonLine = "The ground fills most of the frame, with almost no horizon visible."; break;
+        default:
+          horizonLine = "";
+      }
+      lines.push(locationText + (horizonLine ? ". " + horizonLine : ""));
       lines.push("");
 
       lines.push("--- TIME & WEATHER ---");
@@ -681,7 +761,24 @@
       lines.push("");
 
       lines.push("--- LIGHTING ---");
-      lines.push(lightingDescription + ". " + depthText + (atmosphereText ? ". " + atmosphereText : "") + ". " + colorGradingText);
+      let angleLighting = "";
+      switch (camera.angle) {
+        case "low_angle":
+          angleLighting = "Harsh under-lighting and strong rim light emphasize the low angle."; break;
+        case "high_angle":
+          angleLighting = "Soft overhead light reinforces the high viewpoint from above."; break;
+        default:
+          angleLighting = "";
+      }
+      const lightingSentence =
+        lightingDescription +
+        ". " +
+        depthText +
+        (atmosphereText ? ". " + atmosphereText : "") +
+        ". " +
+        colorGradingText +
+        (angleLighting ? ". " + angleLighting : "");
+      lines.push(lightingSentence);
       lines.push("");
 
       if (moodText) {
@@ -726,6 +823,7 @@
     const promptOutput = document.getElementById("prompt-output");
     const statusRight = document.getElementById("status-right");
     const copyBtn = document.getElementById("copy-btn");
+    const genreGroup = document.getElementById("genre-group");
     const shotGroup = document.getElementById("shot-group");
     const angleGroup = document.getElementById("angle-group");
     const timeGroup = document.getElementById("time-group");
@@ -734,6 +832,7 @@
     const personaRow = document.getElementById("persona-row");
     const personaAddBtn = document.getElementById("persona-add");
 
+    let genreOverride = "";
     let shotOverride = "";
     let angleOverride = "";
     let timeOverride = "";
@@ -791,6 +890,9 @@
     function applyCameraOverrides(scene) {
       scene.camera = scene.camera || {};
       scene.environment = scene.environment || {};
+      if (genreOverride) {
+        scene.genrePreset = genreOverride;
+      }
 
       if (shotOverride) {
         scene.camera.shot = shotOverride;
@@ -837,6 +939,7 @@
       });
     }
 
+    setupPillGroup(genreGroup, (val) => { genreOverride = val; }, genreOverride);
     setupPillGroup(shotGroup, (val) => { shotOverride = val; }, shotOverride);
     setupPillGroup(angleGroup, (val) => { angleOverride = val; }, angleOverride);
     setupPillGroup(timeGroup, (val) => { timeOverride = val; }, timeOverride);
