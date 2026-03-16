@@ -239,11 +239,10 @@
       user-select: none;
       transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
     }
-    /* 프리뷰 썸네일은 더 작게 (4:3 느낌) */
     .shot-thumb img {
       width: 100%;
-      height: 0;
-      padding-bottom: 42%; /* 상대적으로 얕게 */
+      height: auto;
+      aspect-ratio: 16 / 9;
       object-fit: cover;
       border-radius: 6px;
       display: block;
@@ -377,7 +376,6 @@
     #picker-panel {
       position: absolute;
       right: 16px;
-      top: 120px;
       max-height: 360px;
       width: 260px;
       background: #020617;
@@ -395,9 +393,10 @@
       flex-direction: column;
       gap: 6px;
     }
-    /* 팝업 안에서는 진짜 16:9 비율로 조금 더 크게 */
-    #picker-panel .shot-thumb img {
-      padding-bottom: 56.25%;
+    /* 팝업 안에서는 썸네일을 조금 더 크게 보이도록 폭만 넓힘 */
+    #picker-panel .shot-thumb {
+      max-width: 220px;
+      align-self: stretch;
     }
     /* 디렉터 컨트롤 프리뷰 줄은 폭 제한 */
     #genre-preview,
@@ -471,7 +470,7 @@
     <section class="column">
       <div class="section-header">
         <span>Director Controls</span>
-        <span class="sub2">장르 · 카메라 · 시간</span>
+        <span class="sub2">프롬프트에 반영됩니다</span>
       </div>
       <div class="director-controls-inner" style="padding: 10px 12px; display: flex; flex-direction: column; gap: 10px;">
         <!-- 장르 / 무드 (썸네일 1개 프리뷰) -->
@@ -1016,9 +1015,8 @@
 
       pickerOverlay.style.display = "block";
 
-      // 말풍선 위치를 트리거 버튼 근처로 조정
+      // 말풍선 위치 조정: 시간/날씨는 화면 하단 기준, 나머지는 트리거 근처
       if (pickerPanel) {
-        let anchorRect = null;
         let anchorEl = null;
         if (type === "genre") anchorEl = genrePreview;
         else if (type === "shot") anchorEl = shotPreview;
@@ -1026,11 +1024,16 @@
         else if (type === "time") anchorEl = timePreview;
         else if (type === "weather") anchorEl = weatherPreview;
 
-        if (anchorEl) {
-          anchorRect = anchorEl.getBoundingClientRect();
-          const top = Math.max(80, anchorRect.top + window.scrollY - 20);
+        if (type === "time" || type === "weather") {
+          pickerPanel.style.top = "";
+          pickerPanel.style.bottom = "80px";
+        } else if (anchorEl) {
+          const rect = anchorEl.getBoundingClientRect();
+          const top = Math.max(80, rect.top + window.scrollY - 20);
+          pickerPanel.style.bottom = "";
           pickerPanel.style.top = top + "px";
         } else {
+          pickerPanel.style.bottom = "";
           pickerPanel.style.top = "120px";
         }
       }
