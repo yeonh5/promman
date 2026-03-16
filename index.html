@@ -241,9 +241,8 @@
     }
     .shot-thumb img {
       width: 100%;
-      height: auto;
-      aspect-ratio: 16 / 9;
-      max-height: 72px;
+      height: 0;
+      padding-bottom: 56.25%; /* 16:9 */
       object-fit: cover;
       border-radius: 6px;
       display: block;
@@ -1002,6 +1001,25 @@
       });
 
       pickerOverlay.style.display = "block";
+
+      // 말풍선 위치를 트리거 버튼 근처로 조정
+      if (pickerPanel) {
+        let anchorRect = null;
+        let anchorEl = null;
+        if (type === "genre") anchorEl = genrePreview;
+        else if (type === "shot") anchorEl = shotPreview;
+        else if (type === "angle") anchorEl = anglePreview;
+        else if (type === "time") anchorEl = timePreview;
+        else if (type === "weather") anchorEl = weatherPreview;
+
+        if (anchorEl) {
+          anchorRect = anchorEl.getBoundingClientRect();
+          const top = Math.max(80, anchorRect.top + window.scrollY - 20);
+          pickerPanel.style.top = top + "px";
+        } else {
+          pickerPanel.style.top = "120px";
+        }
+      }
     }
 
     function closePicker() {
