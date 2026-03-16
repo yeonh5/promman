@@ -257,6 +257,13 @@
       box-shadow: 0 0 0 1px rgba(59,130,246,0.6);
       transform: translateY(-1px);
     }
+    /* 앵글 그룹: 선택된 썸네일만 보이는 접힘 상태 지원 */
+    .shot-thumb-row.collapsed .shot-thumb {
+      display: none;
+    }
+    .shot-thumb-row.collapsed .shot-thumb.active {
+      display: flex;
+    }
     .select {
       background: #020617;
       color: #e5e7eb;
@@ -478,7 +485,7 @@
         <!-- 카메라 앵글 -->
         <div>
           <div class="status" style="padding-left:0;">카메라 앵글 (Angle)</div>
-          <div id="angle-group" class="shot-thumb-row">
+          <div id="angle-group" class="shot-thumb-row collapsed" data-collapsible="single-preview">
             <button class="shot-thumb" data-value="eye_level">
               <img src="angle-eye-level.png" alt="Eye Level thumbnail">
               <span>Eye Level</span>
