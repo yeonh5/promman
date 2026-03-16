@@ -258,13 +258,6 @@
       box-shadow: 0 0 0 1px rgba(59,130,246,0.6);
       transform: translateY(-1px);
     }
-    /* 앵글 그룹: 선택된 썸네일만 보이는 접힘 상태 지원 */
-    .shot-thumb-row.collapsed .shot-thumb {
-      display: none;
-    }
-    .shot-thumb-row.collapsed .shot-thumb.active {
-      display: flex;
-    }
     .select {
       background: #020617;
       color: #e5e7eb;
@@ -369,6 +362,34 @@
       color: #111827;
     }
 
+    /* 공용 선택 팝업 */
+    #picker-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      z-index: 40;
+    }
+    #picker-panel {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 260px;
+      background: #020617;
+      border-left: 1px solid #111827;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+    }
+    #picker-options {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
   </style>
 </head>
 <body>
@@ -434,153 +455,64 @@
         <span class="sub2">장르 · 카메라 · 시간</span>
       </div>
       <div class="director-controls-inner" style="padding: 10px 12px; display: flex; flex-direction: column; gap: 10px;">
-        <!-- 장르 / 무드 -->
+        <!-- 장르 / 무드 (썸네일 1개 프리뷰) -->
         <div>
           <div class="status" style="padding-left:0;">장르 / 무드</div>
-          <div id="genre-group" class="pill-group">
-            <button class="pill-button active" data-value="">Auto</button>
-            <button class="pill-button" data-value="coming_of_age">Coming-of-age youth drama</button>
-            <button class="pill-button" data-value="dreamy_romance">Dreamy romance</button>
-            <button class="pill-button" data-value="gritty_noir">Gritty urban noir</button>
-            <button class="pill-button" data-value="slice_of_life">Quiet slice-of-life</button>
-            <button class="pill-button" data-value="thriller">Tense cinematic thriller</button>
-          </div>
+          <button id="genre-preview" class="shot-thumb" type="button">
+            <img src="genre-drama.png" alt="장르 thumbnail">
+            <span>Drama</span>
+          </button>
         </div>
 
-        <!-- 카메라 화각 -->
+        <!-- 카메라 화각 (Shot) 프리뷰 -->
         <div>
-          <div class="status" style="padding-left:0;">카메라 화각 (Shot) · Recommend는 장면 맥락에 따라 LLM이 자동 선택</div>
-          <div id="shot-group" class="shot-thumb-row collapsed" data-collapsible="single-preview">
-            <button class="shot-thumb" data-value="">
-              <img src="shot-recommend.png" alt="Recommend shot thumbnail">
-              <span>Recommend</span>
-            </button>
-            <button class="shot-thumb" data-value="extreme_close_up">
-              <img src="shot-extreme-close-up.png" alt="Extreme Close-Up thumbnail">
-              <span>Extreme Close-Up</span>
-            </button>
-            <button class="shot-thumb" data-value="close_up">
-              <img src="shot-close-up.png" alt="Close-Up thumbnail">
-              <span>Close-Up</span>
-            </button>
-            <button class="shot-thumb" data-value="medium_close_up">
-              <img src="shot-medium-close-up.png" alt="Medium Close-Up thumbnail">
-              <span>Medium Close-Up</span>
-            </button>
-            <button class="shot-thumb" data-value="medium">
-              <img src="shot-medium-shot.png" alt="Medium Shot thumbnail">
-              <span>Medium Shot</span>
-            </button>
-            <button class="shot-thumb" data-value="medium_wide">
-              <img src="shot-medium-wide-shot.png" alt="Medium Wide Shot thumbnail">
-              <span>Medium Wide Shot</span>
-            </button>
-            <button class="shot-thumb" data-value="wide">
-              <img src="shot-wide-shot.png" alt="Wide Shot thumbnail">
-              <span>Wide Shot</span>
-            </button>
-            <button class="shot-thumb" data-value="extreme_wide">
-              <img src="shot-extreme-wide-shot.png" alt="Extreme Wide Shot thumbnail">
-              <span>Extreme Wide Shot</span>
-            </button>
-          </div>
+          <div class="status" style="padding-left:0;">카메라 화각 (Shot)</div>
+          <button id="shot-preview" class="shot-thumb" type="button">
+            <img src="shot-medium-shot.png" alt="Shot thumbnail">
+            <span>Medium Shot</span>
+          </button>
         </div>
 
-        <!-- 카메라 앵글 -->
+        <!-- 카메라 앵글 (Angle) 프리뷰 -->
         <div>
           <div class="status" style="padding-left:0;">카메라 앵글 (Angle)</div>
-          <div id="angle-group" class="shot-thumb-row collapsed" data-collapsible="single-preview">
-            <button class="shot-thumb" data-value="eye_level">
-              <img src="angle-eye-level.png" alt="Eye Level thumbnail">
-              <span>Eye Level</span>
-            </button>
-            <button class="shot-thumb" data-value="low_angle">
-              <img src="angle-low-angle.png" alt="Low Angle thumbnail">
-              <span>Low Angle</span>
-            </button>
-            <button class="shot-thumb" data-value="high_angle">
-              <img src="angle-high-angle.png" alt="High Angle thumbnail">
-              <span>High Angle</span>
-            </button>
-            <button class="shot-thumb" data-value="top_down">
-              <img src="angle-birds-eye-view.png" alt="Bird's Eye View thumbnail">
-              <span>Bird's Eye View</span>
-            </button>
-            <button class="shot-thumb" data-value="worms_eye">
-              <img src="angle-worms-eye-view.png" alt="Worm's Eye View thumbnail">
-              <span>Worm's Eye View</span>
-            </button>
-            <button class="shot-thumb" data-value="dutch_angle">
-              <img src="angle-dutch-angle.png" alt="Dutch Angle thumbnail">
-              <span>Dutch / Canted Angle</span>
-            </button>
-            <button class="shot-thumb" data-value="over_shoulder">
-              <img src="angle-over-the-shoulder.png" alt="Over the Shoulder thumbnail">
-              <span>Over the Shoulder</span>
-            </button>
-            <button class="shot-thumb" data-value="pov">
-              <img src="angle-point-of-view.png" alt="Point of View thumbnail">
-              <span>Point of View</span>
-            </button>
-          </div>
+          <button id="angle-preview" class="shot-thumb" type="button">
+            <img src="angle-eye-level.png" alt="Angle thumbnail">
+            <span>Eye Level</span>
+          </button>
         </div>
 
-        <!-- 시간 (새벽·낮·노을·밤) -->
+        <!-- 시간 (새벽·낮·노을·밤) 프리뷰 -->
         <div>
           <div class="status" style="padding-left:0;">시간</div>
-          <div id="time-group" class="shot-thumb-row collapsed" data-collapsible="single-preview" style="grid-template-columns: repeat(4, 1fr);">
-            <button class="shot-thumb" data-value="dawn">
-              <img src="time-dawn.png" alt="새벽 thumbnail">
-              <span>새벽</span>
-            </button>
-            <button class="shot-thumb" data-value="day">
-              <img src="time-day.png" alt="낮 thumbnail">
-              <span>낮</span>
-            </button>
-            <button class="shot-thumb" data-value="dusk">
-              <img src="time-dusk.png" alt="노을 thumbnail">
-              <span>노을</span>
-            </button>
-            <button class="shot-thumb" data-value="night">
-              <img src="time-night.png" alt="밤 thumbnail">
-              <span>밤</span>
-            </button>
-          </div>
+          <button id="time-preview" class="shot-thumb" type="button">
+            <img src="time-day.png" alt="Time thumbnail">
+            <span>낮</span>
+          </button>
         </div>
 
-        <!-- 날씨 -->
+        <!-- 날씨 프리뷰 -->
         <div>
           <div class="status" style="padding-left:0;">날씨</div>
-          <div id="weather-group" class="shot-thumb-row" style="grid-template-columns: repeat(3, 1fr);">
-            <button class="shot-thumb" data-value="clear">
-              <img src="weather-clear.png" alt="맑음 thumbnail">
-              <span>맑음</span>
-            </button>
-            <button class="shot-thumb" data-value="snowy">
-              <img src="weather-snow.png" alt="눈 thumbnail">
-              <span>눈</span>
-            </button>
-            <button class="shot-thumb" data-value="rainy">
-              <img src="weather-rain.png" alt="비 thumbnail">
-              <span>비</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- 감독 프리셋 -->
-        <div>
-          <div class="status" style="padding-left:0;">감독 스타일 프리셋</div>
-          <div id="director-group" class="pill-group">
-            <button class="pill-button active" data-value="none">없음</button>
-            <button class="pill-button" data-value="park_chan_wook">박찬욱</button>
-            <button class="pill-button" data-value="bong_joon_ho">봉준호</button>
-            <button class="pill-button" data-value="greta_gerwig">그레타 거윅</button>
-            <button class="pill-button" data-value="nolan">크리스토퍼 놀란</button>
-          </div>
+          <button id="weather-preview" class="shot-thumb" type="button">
+            <img src="weather-clear.png" alt="Weather thumbnail">
+            <span>맑음</span>
+          </button>
         </div>
       </div>
     </section>
   </main>
+
+  <!-- 선택 팝업 오버레이 -->
+  <div id="picker-overlay">
+    <div id="picker-panel">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span id="picker-title" style="font-size:12px; color:#9ca3af;">선택</span>
+        <button id="picker-close" class="btn secondary" type="button" style="padding:2px 8px; font-size:10px;">닫기</button>
+      </div>
+      <div id="picker-options"></div>
+    </div>
+  </div>
 
   <script>
     // ===== 1) SceneSchema → 프롬프트 빌더 (규칙 기반) =====
@@ -735,26 +667,30 @@
       const genre = scene.genrePreset || "auto";
       if (!scene.mood) scene.mood = {};
       switch (genre) {
-        case "coming_of_age":
-          scene.mood.tone_en = "coming-of-age Korean youth drama";
-          requiredKeywordsArr.push("naturalistic acting", "subtle emotions", "warm but realistic tone");
+        case "action":
+          scene.mood.tone_en = "dynamic, high-energy action film";
+          requiredKeywordsArr.push("strong motion", "dynamic posing", "heightened tension");
           break;
-        case "dreamy_romance":
-          scene.mood.tone_en = "dreamy, soft Korean romance film";
-          requiredKeywordsArr.push("soft focus", "pastel colors", "gentle romantic atmosphere");
-          break;
-        case "gritty_noir":
-          scene.mood.tone_en = "gritty urban noir";
-          colorGradingText = "dark, contrasty noir-inspired grading";
-          requiredKeywordsArr.push("low key lighting", "urban night streets", "grainy texture");
-          break;
-        case "slice_of_life":
-          scene.mood.tone_en = "quiet slice-of-life realism";
-          requiredKeywordsArr.push("simple everyday setting", "unaffected naturalism");
+        case "romance":
+          scene.mood.tone_en = "soft, emotional romance film";
+          requiredKeywordsArr.push("gentle intimacy", "warm atmosphere", "tender connection");
           break;
         case "thriller":
-          scene.mood.tone_en = "tense, suspenseful cinematic thriller";
-          requiredKeywordsArr.push("high contrast lighting", "heightened tension", "tight framing");
+          scene.mood.tone_en = "tense, suspenseful thriller";
+          requiredKeywordsArr.push("heightened tension", "nervous anticipation", "dark atmosphere");
+          colorGradingText = "dark, contrasty thriller-inspired grading";
+          break;
+        case "documentary":
+          scene.mood.tone_en = "grounded, realistic documentary style";
+          requiredKeywordsArr.push("natural light", "unposed realism", "subtle camera presence");
+          break;
+        case "animation":
+          scene.mood.tone_en = "stylized, expressive animation look";
+          requiredKeywordsArr.push("bold color shapes", "clear silhouettes", "slightly exaggerated expressions");
+          break;
+        case "drama":
+          scene.mood.tone_en = "quiet, introspective drama";
+          requiredKeywordsArr.push("subtle expressions", "everyday realism", "soft but present tension");
           break;
       }
 
@@ -919,21 +855,24 @@
     const copyBtn = document.getElementById("copy-btn");
     const modelSelect = document.getElementById("model-select");
     const historyList = document.getElementById("history-list");
-    const genreGroup = document.getElementById("genre-group");
-    const shotGroup = document.getElementById("shot-group");
-    const angleGroup = document.getElementById("angle-group");
-    const timeGroup = document.getElementById("time-group");
-    const weatherGroup = document.getElementById("weather-group");
-    const directorGroup = document.getElementById("director-group");
+    const genrePreview = document.getElementById("genre-preview");
+    const shotPreview = document.getElementById("shot-preview");
+    const anglePreview = document.getElementById("angle-preview");
+    const timePreview = document.getElementById("time-preview");
+    const weatherPreview = document.getElementById("weather-preview");
+    const pickerOverlay = document.getElementById("picker-overlay");
+    const pickerPanel = document.getElementById("picker-panel");
+    const pickerTitle = document.getElementById("picker-title");
+    const pickerOptions = document.getElementById("picker-options");
+    const pickerClose = document.getElementById("picker-close");
     const personaRow = document.getElementById("persona-row");
     const personaAddBtn = document.getElementById("persona-add");
 
-    let genreOverride = "";
+    let genreOverride = "drama";
     let shotOverride = "";
-    let angleOverride = "";
-    let timeOverride = "";
-    let weatherOverride = "";
-    let directorOverride = "none";
+    let angleOverride = "eye_level";
+    let timeOverride = "day";
+    let weatherOverride = "clear";
     let historyCounter = 0;
 
     function setStatusRight(text, isError) {
@@ -944,44 +883,6 @@
       el.textContent = text;
       if (isError) el.classList.add("error");
       else el.classList.remove("error");
-    }
-
-    function applyDirectorOverrides(scene) {
-      const override = directorOverride;
-      if (!override || override === "none") return scene;
-
-      scene.styleControl = scene.styleControl || {
-        stylePreset: "unspecified",
-        allow_stylization: true,
-        required_keywords_en: [],
-        forbidden_keywords_en: []
-      };
-      scene.mood = scene.mood || {};
-
-      switch (override) {
-        case "park_chan_wook":
-          scene.styleControl.stylePreset = "korean_indie_drama";
-          scene.mood.tone_en = "dark, tense, meticulously composed like a Park Chan-wook film";
-          scene.styleControl.required_keywords_en.push("highly composed framing", "Korean auteur cinema");
-          break;
-        case "bong_joon_ho":
-          scene.styleControl.stylePreset = "korean_urban_romance_film";
-          scene.mood.tone_en = "realistic, slightly satirical, with social tension like a Bong Joon-ho film";
-          scene.styleControl.required_keywords_en.push("Korean realist cinema", "subtle social commentary");
-          break;
-        case "greta_gerwig":
-          scene.styleControl.stylePreset = "korean_urban_romance_film";
-          scene.mood.tone_en = "warm, tender, youth-driven energy like a Greta Gerwig film";
-          scene.styleControl.required_keywords_en.push("soft pastel colors", "gentle whimsical tone");
-          break;
-        case "nolan":
-          scene.styleControl.stylePreset = "hollywood_blockbuster";
-          scene.mood.tone_en = "epic, serious, high-stakes atmosphere like a Christopher Nolan film";
-          scene.styleControl.required_keywords_en.push("strong contrast lighting", "precise, dramatic framing");
-          break;
-      }
-
-      return scene;
     }
 
     function applyCameraOverrides(scene) {
@@ -1007,50 +908,98 @@
       return scene;
     }
 
-    function setupPillGroup(groupEl, onChange, initialValue) {
-      if (!groupEl) return;
-      const buttons = Array.from(groupEl.querySelectorAll(".pill-button, .shot-thumb"));
-      const isSinglePreviewCollapsible = groupEl.getAttribute("data-collapsible") === "single-preview";
+    // 디렉터 컨트롤 팝업용 옵션들
+    const GENRE_OPTIONS = [
+      { value: "action",      label: "Action",      img: "genre-action.png" },
+      { value: "romance",     label: "Romance",     img: "genre-romance.png" },
+      { value: "thriller",    label: "Thriller",    img: "genre-thriller.png" },
+      { value: "documentary", label: "Documentary", img: "genre-documentary.png" },
+      { value: "animation",   label: "Animation",   img: "genre-animation.png" },
+      { value: "drama",       label: "Drama",       img: "genre-drama.png" }
+    ];
 
-      if (initialValue !== undefined) {
-        buttons.forEach((btn, idx) => {
-          const val = btn.getAttribute("data-value") || "";
-          if ((val || "") === initialValue || (!initialValue && idx === 0)) {
-            btn.classList.add("active");
-          } else {
-            btn.classList.remove("active");
-          }
-        });
+    const SHOT_OPTIONS = [
+      { value: "",                label: "Recommend",         img: "shot-recommend.png" },
+      { value: "extreme_close_up", label: "Extreme Close-Up", img: "shot-extreme-close-up.png" },
+      { value: "close_up",         label: "Close-Up",         img: "shot-close-up.png" },
+      { value: "medium_close_up",  label: "Medium Close-Up",  img: "shot-medium-close-up.png" },
+      { value: "medium",           label: "Medium Shot",      img: "shot-medium-shot.png" },
+      { value: "medium_wide",      label: "Medium Wide Shot", img: "shot-medium-wide-shot.png" },
+      { value: "wide",             label: "Wide Shot",        img: "shot-wide-shot.png" },
+      { value: "extreme_wide",     label: "Extreme Wide Shot", img: "shot-extreme-wide-shot.png" }
+    ];
+
+    const ANGLE_OPTIONS = [
+      { value: "eye_level",   label: "Eye Level",        img: "angle-eye-level.png" },
+      { value: "low_angle",   label: "Low Angle",        img: "angle-low-angle.png" },
+      { value: "high_angle",  label: "High Angle",       img: "angle-high-angle.png" },
+      { value: "top_down",    label: "Bird's Eye View",  img: "angle-birds-eye-view.png" },
+      { value: "worms_eye",   label: "Worm's Eye View",  img: "angle-worms-eye-view.png" },
+      { value: "dutch_angle", label: "Dutch Angle",      img: "angle-dutch-angle.png" },
+      { value: "over_shoulder", label: "Over the Shoulder", img: "angle-over-the-shoulder.png" },
+      { value: "pov",         label: "Point of View",    img: "angle-point-of-view.png" }
+    ];
+
+    const TIME_OPTIONS = [
+      { value: "dawn",  label: "새벽", img: "time-dawn.png" },
+      { value: "day",   label: "낮",   img: "time-day.png" },
+      { value: "dusk",  label: "노을", img: "time-dusk.png" },
+      { value: "night", label: "밤",   img: "time-night.png" }
+    ];
+
+    const WEATHER_OPTIONS = [
+      { value: "clear", label: "맑음", img: "weather-clear.png" },
+      { value: "snowy", label: "눈",   img: "weather-snow.png" },
+      { value: "rainy", label: "비",   img: "weather-rain.png" }
+    ];
+
+    function updatePreviewButton(btn, opt) {
+      if (!btn || !opt) return;
+      const img = btn.querySelector("img");
+      const span = btn.querySelector("span");
+      if (img) {
+        img.src = opt.img;
+        img.alt = opt.label + " thumbnail";
       }
+      if (span) {
+        span.textContent = opt.label;
+      }
+    }
 
-      groupEl.addEventListener("click", (e) => {
-        let target = e.target;
-        if (!(target instanceof HTMLElement)) return;
-        if (target.closest(".shot-thumb")) {
-          target = target.closest(".shot-thumb");
-        }
-        if (!target.classList.contains("pill-button") && !target.classList.contains("shot-thumb")) return;
+    function openPicker(type, options, currentValue, onSelect) {
+      if (!pickerOverlay || !pickerOptions || !pickerTitle) return;
+      pickerOptions.innerHTML = "";
+      pickerTitle.textContent =
+        type === "genre" ? "장르 / 무드 선택" :
+        type === "shot"  ? "화각 선택" :
+        type === "angle" ? "앵글 선택" :
+        type === "time"  ? "시간 선택" :
+        type === "weather" ? "날씨 선택" : "선택";
 
-        // 접힘 모드: 첫 클릭은 펼치기만
-        if (isSinglePreviewCollapsible && groupEl.classList.contains("collapsed")) {
-          e.preventDefault();
-          groupEl.classList.remove("collapsed");
-          return;
-        }
-
-        e.preventDefault();
-        const val = target.getAttribute("data-value") || "";
-        buttons.forEach((btn) => {
-          if (btn === target) btn.classList.add("active");
-          else btn.classList.remove("active");
+      options.forEach((opt) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "shot-thumb";
+        if (opt.value === currentValue) btn.classList.add("active");
+        const img = document.createElement("img");
+        img.src = opt.img;
+        img.alt = opt.label + " thumbnail";
+        const span = document.createElement("span");
+        span.textContent = opt.label;
+        btn.appendChild(img);
+        btn.appendChild(span);
+        btn.addEventListener("click", () => {
+          onSelect(opt.value, opt);
+          closePicker();
         });
-        onChange(val);
-
-        // 선택 후 다시 한 장만 보이도록 접기
-        if (isSinglePreviewCollapsible) {
-          groupEl.classList.add("collapsed");
-        }
+        pickerOptions.appendChild(btn);
       });
+
+      pickerOverlay.style.display = "block";
+    }
+
+    function closePicker() {
+      if (pickerOverlay) pickerOverlay.style.display = "none";
     }
 
     // 나노 바나나 등 특정 모델용 프롬프트 후처리
@@ -1058,7 +1007,7 @@
       const { model, genre, cameraAngle } = options || {};
       let out = prompt;
 
-      const isRomanceGenre = ["dreamy_romance", "coming_of_age"].includes(genre);
+      const isRomanceGenre = ["romance", "drama"].includes(genre);
 
       // 1) 로맨스/청춘 장르: 거친 단어 제거 후 부드러운 톤 보강
       if (model === "nanobanana" && isRomanceGenre) {
@@ -1081,12 +1030,64 @@
       return out;
     }
 
-    setupPillGroup(genreGroup, (val) => { genreOverride = val; }, genreOverride);
-    setupPillGroup(shotGroup, (val) => { shotOverride = val; }, shotOverride);
-    setupPillGroup(angleGroup, (val) => { angleOverride = val; }, angleOverride || "eye_level");
-    setupPillGroup(timeGroup, (val) => { timeOverride = val; }, timeOverride || "day");
-    setupPillGroup(weatherGroup, (val) => { weatherOverride = val; }, weatherOverride);
-    setupPillGroup(directorGroup, (val) => { directorOverride = val || "none"; }, directorOverride);
+    if (pickerClose) pickerClose.addEventListener("click", closePicker);
+    if (pickerOverlay) pickerOverlay.addEventListener("click", (e) => {
+      if (e.target === pickerOverlay) closePicker();
+    });
+
+    function findOption(options, value, fallbackIdx) {
+      let opt = options.find((o) => o.value === value);
+      if (!opt) opt = options[fallbackIdx ?? 0];
+      return opt;
+    }
+
+    // 초기 프리뷰 세팅
+    updatePreviewButton(genrePreview,   findOption(GENRE_OPTIONS, genreOverride, 5));
+    updatePreviewButton(shotPreview,    findOption(SHOT_OPTIONS, shotOverride, 3));
+    updatePreviewButton(anglePreview,   findOption(ANGLE_OPTIONS, angleOverride, 0));
+    updatePreviewButton(timePreview,    findOption(TIME_OPTIONS, timeOverride, 1));
+    updatePreviewButton(weatherPreview, findOption(WEATHER_OPTIONS, weatherOverride, 0));
+
+    if (genrePreview) {
+      genrePreview.addEventListener("click", () => {
+        openPicker("genre", GENRE_OPTIONS, genreOverride, (val, opt) => {
+          genreOverride = val;
+          updatePreviewButton(genrePreview, opt);
+        });
+      });
+    }
+    if (shotPreview) {
+      shotPreview.addEventListener("click", () => {
+        openPicker("shot", SHOT_OPTIONS, shotOverride, (val, opt) => {
+          shotOverride = val;
+          updatePreviewButton(shotPreview, opt);
+        });
+      });
+    }
+    if (anglePreview) {
+      anglePreview.addEventListener("click", () => {
+        openPicker("angle", ANGLE_OPTIONS, angleOverride, (val, opt) => {
+          angleOverride = val;
+          updatePreviewButton(anglePreview, opt);
+        });
+      });
+    }
+    if (timePreview) {
+      timePreview.addEventListener("click", () => {
+        openPicker("time", TIME_OPTIONS, timeOverride, (val, opt) => {
+          timeOverride = val;
+          updatePreviewButton(timePreview, opt);
+        });
+      });
+    }
+    if (weatherPreview) {
+      weatherPreview.addEventListener("click", () => {
+        openPicker("weather", WEATHER_OPTIONS, weatherOverride, (val, opt) => {
+          weatherOverride = val;
+          updatePreviewButton(weatherPreview, opt);
+        });
+      });
+    }
 
     function buildHistoryTitle(koreanText, fallbackId) {
       const base = (koreanText || "").split(/\r?\n/)[0].trim();
@@ -1204,7 +1205,6 @@
           scene.personas = personas;
         }
         scene = applyCameraOverrides(scene);
-        scene = applyDirectorOverrides(scene);
         const prompt = buildPromptFromScene(scene);
 
         const model = modelSelect ? (modelSelect.value || "generic") : "generic";
