@@ -66,7 +66,7 @@ interface SceneSchema {
   };
   camera: {
     shot: "extreme_close_up" | "close_up" | "medium" | "medium_wide" | "wide" | "long";
-    angle: "eye_level" | "high_angle" | "low_angle" | "dutch_angle" | "top_down" | "unspecified";
+    angle: "eye_level" | "high_angle" | "low_angle" | "dutch_angle" | "top_down" | "worms_eye" | "unspecified";
     movement: "static" | "pan" | "tilt" | "dolly_in" | "dolly_out" | "truck" | "arc" | "crane" | "handheld" | "unspecified";
     lens_mm?: number;
     depthOfField_en?: string;
@@ -87,17 +87,16 @@ interface SceneSchema {
   };
 }
 
-When the Korean text contains subjective or vague adjectives like "잘생긴", "예쁜", "멋진", "귀여운", "섹시한", "무서운", "센치한", etc., you MUST convert them into concrete, visual, physical or behavioral descriptions in English.
-NEVER leave purely subjective words in English like "handsome", "pretty", "cool", "sexy", "scary", "cute" without also giving specific details.
-Always rewrite them as detailed descriptions, for example:
-- "잘생긴 남자" -> "a young man with a sharp jawline, clear skin, and well-defined features"
-- "예쁜 여자" -> "a woman with bright eyes, smooth skin, and delicate facial features"
-- "귀여운 표정" -> "a playful expression with slightly raised cheeks and a soft smile"
-- "무서운 눈빛" -> "a piercing stare with eyebrows slightly lowered and eyes narrowed"
-Apply this rule consistently to all people and objects so that description_en and other *_en fields are concrete and specific enough to draw.
+### CRITICAL INSTRUCTIONS FOR CAMERA ANGLES ###
+If the camera angle is anything other than 'eye_level', you MUST provide extreme physical descriptions in the fields 'camera.depthOfField_en' or 'lighting.description_en' to force the perspective:
+- For 'worms_eye': Use "The camera is placed flat on the ground, touching the pavement, looking strictly upward at a steep vertical angle. The horizon is at the very bottom."
+- For 'low_angle': Use "The camera is positioned very low, looking up. The subjects tower over the lens."
+- For 'high_angle' or 'top_down': Use "The camera is placed near the ceiling, looking straight down. The ground fills the entire frame."
 
-Focus on realistic Korean film style (not anime, not hyper-realistic plastic skin).
-Return ONLY the JSON, with no explanation.`;
+When the Korean text contains subjective adjectives like "잘생긴", "예쁜", etc., convert them into concrete, visual descriptions. 
+Example: "잘생긴 남자" -> "a young man with a sharp jawline and well-defined features".
+
+Focus on realistic Korean film style. Return ONLY the JSON.`;
 
     const userPrompt = `한국어 장면 설명: "${koreanText}"`;
 
@@ -113,7 +112,7 @@ Return ONLY the JSON, with no explanation.`;
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        temperature: 0.3
+        temperature: 0.2 // 정확도를 위해 온도를 낮춤
       })
     });
 
@@ -128,11 +127,10 @@ Return ONLY the JSON, with no explanation.`;
     const data = await groqRes.json();
     let content = data.choices?.[0]?.message?.content || "{}";
 
-    // 일부 모델이 ```json ... ``` 형태로 감싸서 반환하는 경우 처리
     if (typeof content === "string" && content.trim().startsWith("```")) {
       content = content.trim()
-        .replace(/^```[a-zA-Z]*\s*/,'') // 맨 앞 ``` 또는 ```json 제거
-        .replace(/```$/,'')            // 맨 끝 ``` 제거
+        .replace(/^```[a-zA-Z]*\s*/,'')
+        .replace(/```$/,'')
         .trim();
     }
 
@@ -147,4 +145,3 @@ Return ONLY the JSON, with no explanation.`;
     res.end(JSON.stringify({ error: "Internal error", detail: String(err && err.message || err) }));
   }
 };
-
