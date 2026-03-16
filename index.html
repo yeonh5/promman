@@ -88,15 +88,16 @@
     }
 
     .section-header {
-      padding: 8px 12px;
-      font-size: 12px;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #9ca3af;
+      color: #e5e7eb;
       border-bottom: 1px solid #111827;
       background: #000000;
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-start;
       align-items: center;
       gap: 8px;
     }
@@ -104,7 +105,8 @@
       font-size: 11px;
       text-transform: none;
       letter-spacing: 0;
-      color: #6b7280;
+      color: #9ca3af;
+      font-weight: 400;
     }
 
     textarea {
@@ -123,7 +125,7 @@
     }
 
     .ko-input-wrapper {
-      padding: 10px 12px;
+      padding: 12px 12px;
       border-bottom: 1px solid #111827;
     }
     .ko-row {
@@ -150,8 +152,13 @@
       justify-content: center;
       gap: 6px;
       white-space: nowrap;
+      transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
     }
-    .btn:hover { background: #2563eb; }
+    .btn:hover {
+      background: #2563eb;
+      box-shadow: 0 6px 14px rgba(37, 99, 235, 0.35);
+      transform: translateY(-1px);
+    }
     .btn.secondary {
       background: #111827;
       color: #e5e7eb;
@@ -162,7 +169,9 @@
     .status {
       font-size: 11px;
       color: #9ca3af;
-      padding: 4px 12px 0;
+      padding: 4px 12px 2px;
+      line-height: 1.5;
+      text-align: left;
     }
     .status.error { color: #f97373; }
 
@@ -212,11 +221,12 @@
       color: #9ca3af;
       cursor: pointer;
       user-select: none;
-      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+      transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.1s ease;
     }
     .pill-button:hover {
       background: #111827;
       color: #e5e7eb;
+      transform: translateY(-0.5px);
     }
     .pill-button.active {
       background: #3b82f6;
@@ -263,14 +273,14 @@
       align-items: center;
       cursor: pointer;
       user-select: none;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease, background-color 0.18s ease;
     }
     .shot-thumb img {
       width: 100%;
       height: auto;
       aspect-ratio: 16 / 9;
       object-fit: cover;
-      border-radius: 6px;
+      border-radius: 4px;
       display: block;
     }
     .shot-thumb span {
@@ -282,6 +292,7 @@
       border-color: #3b82f6;
       box-shadow: 0 0 0 1px rgba(59,130,246,0.6);
       transform: translateY(-1px);
+      background: #02091f;
     }
     .select {
       background: #020617;
@@ -307,6 +318,7 @@
       background: #020617;
       border: 1px solid #374151;
       overflow: hidden;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
     }
     .persona-remove {
       width: 18px;
@@ -330,10 +342,10 @@
     }
 
     .history-list {
-      padding: 10px 12px 12px;
+      padding: 12px 12px 14px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
     .history-item {
       border-radius: 8px;
@@ -524,6 +536,17 @@
       <div id="history-list" class="history-list"></div>
       <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6458366620856306"
         crossorigin="anonymous"></script>
+      <div style="margin: 10px; text-align: center;">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-6458366620856306"
+             data-ad-slot="여기에_광고단위_ID_입력"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+      </div>
     </section>
 
     <!-- 가운데: 한국어 입력 + 결과 프롬프트 -->
@@ -547,6 +570,11 @@
         <div class="ko-row">
           <textarea id="ko-input" placeholder="여기에 장면을 한국어로 적어보세요.&#10;예) 한국 남녀가 풋풋하게 종로 호프에서 맥주를 마시고 있다"></textarea>
           <button class="btn" id="generate-btn">프롬프트</button>
+        </div>
+        <div style="margin-top:6px; border-radius:6px; border:1px solid #1f2937; padding:6px 8px; background:#020617; overflow:hidden; display:flex; align-items:center;">
+          <span id="tip-text" style="display:inline-block; font-size:11px; color:#9ca3af; line-height:1.4; transform:translateY(0); transition:opacity 0.3s ease, transform 0.3s ease;">
+            💡 TIP: 인물 A, 인물 B처럼 페르소나를 나누고, 오버 더 숄더 샷에서는 A의 얼굴이 부분적으로 보이게, B의 얼굴을 메인 피사체로 상상하면서 장면을 적어보세요.
+          </span>
         </div>
         <div id="continuation-toggle-row" style="margin-top:6px; display:none; justify-content:center;">
           <button class="btn secondary" id="continuation-toggle-btn" type="button" style="font-size:11px; padding:2px 10px;">+ 이어지는 장면</button>
@@ -580,13 +608,13 @@
     <!-- 오른쪽: 촬영감독 컨트롤 패널 -->
     <section class="column">
       <div class="section-header">
-        <span>Director Controls</span>
-        <span class="sub2" id="director-mode-label">프롬프트에 반영됩니다 · 이미지 모드</span>
+        <span>Director</span>
+        <span class="sub2" id="director-mode-label">Controls · Image</span>
       </div>
       <div class="director-controls-inner" style="padding: 10px 12px;">
-        <!-- 장르 / 무드 (썸네일 1개 프리뷰) -->
+        <!-- Genre / Mood (썸네일 1개 프리뷰) -->
         <div class="director-span-2">
-          <div class="status" style="padding-left:0;">장르 / 무드</div>
+          <div class="status" style="padding-left:0;">Genre</div>
           <button id="genre-preview" class="shot-thumb" type="button">
             <img src="img/genre-drama.png" alt="장르 thumbnail">
             <span>Drama</span>
@@ -595,7 +623,7 @@
 
         <!-- 카메라 화각 (Shot) 프리뷰 -->
         <div>
-          <div class="status" style="padding-left:0;">카메라 화각 (Shot)</div>
+          <div class="status" style="padding-left:0;">Shot</div>
           <button id="shot-preview" class="shot-thumb" type="button">
             <img src="img/shot-medium-shot.png" alt="Shot thumbnail">
             <span>Medium Shot</span>
@@ -604,7 +632,7 @@
 
         <!-- 카메라 앵글 (Angle) 프리뷰 -->
         <div>
-          <div class="status" style="padding-left:0;">카메라 앵글 (Angle)</div>
+          <div class="status" style="padding-left:0;">Angle</div>
           <button id="angle-preview" class="shot-thumb" type="button">
             <img src="img/angle-eye-level.png" alt="Angle thumbnail">
             <span>Eye Level</span>
@@ -613,7 +641,7 @@
 
         <!-- 비디오 모드 전용 카메라 무빙 (썸네일 + 핸드헬드 강도 슬라이더) -->
         <div id="audio-movement-section" style="display:none;">
-          <div class="status" style="padding-left:0;">카메라 무빙</div>
+          <div class="status" style="padding-left:0;">Motion</div>
           <button id="movement-preview" class="shot-thumb" type="button" style="max-width: 160px; margin-top: 4px;">
             <img src="img/move-static.gif" alt="Movement thumbnail">
             <span>Hold</span>
@@ -925,8 +953,9 @@
           const shoulderPerson = personas[0] || "a person";
           const targetPerson = personas[1] || "another person";
           cameraIntent =
-            `An over-the-shoulder shot. The foreground is filled by the back of ${shoulderPerson}'s head and shoulder, ` +
-            `partially blocking the frame, while the camera looks past them toward ${targetPerson}'s face.`;
+            `An over-the-shoulder shot. The camera is placed just behind ${shoulderPerson}, ` +
+            `so that the side of ${shoulderPerson}'s face and shoulder are clearly visible in the foreground, ` +
+            `while looking past them toward ${targetPerson}'s face.`;
           break;
         }
         default:
@@ -1512,8 +1541,8 @@
       if (!directorModeLabel) return;
       directorModeLabel.textContent =
         mediaType === "audio"
-          ? "프롬프트에 반영됩니다 · 비디오 모드"
-          : "프롬프트에 반영됩니다 · 이미지 모드";
+          ? "Controls · Video"
+          : "Controls · Image";
     }
 
     if (mediaTypeGroup) {
@@ -1653,6 +1682,35 @@
       } catch (e) {
         setStatusRight("SceneSchema 생성 실패: " + e.message, true);
       }
+    }
+
+    // TIP 롤링 (10초마다 교체, 위로 살짝 올라가며 전환)
+    const tipTextEl = document.getElementById("tip-text");
+    const tipMessages = [
+      "💡 TIP: 오버 더 숄더 샷에서는 인물 A의 얼굴이 보이는 방향으로 생성됩니다. 필요시 인물 배치를 반대로 조정해 보세요.",
+      "💡 TIP: 이용하는 이미지 생성 서비스에 따라 프롬프트 인식률과 결과물 품질에는 차이가 있을 수 있습니다.",
+      "💡 TIP: 광고를 클릭해 주실 때마다 이 서비스를 개선하는 데 큰 도움이 됩니다.",
+      "💡 TIP: 이 서비스는 bolder studio에서 제작 및 운영되고 있습니다.",
+      "💡 TIP: 서비스 개선에 대한 아이디어나 요청은 메일로 보내주시면 검토 후 반영을 검토하겠습니다.",
+      "💡 TIP: \"눈을 작게 뜨고 있다\"보다는 \"졸리다\", \"피곤하다\" 같은 감정·상태 표현의 인식률이 더 높은 편입니다."
+    ];
+    if (tipTextEl) {
+      let tipIndex = 0;
+      setInterval(() => {
+        // 사라지는 애니메이션
+        tipTextEl.style.opacity = "0";
+        tipTextEl.style.transform = "translateY(-4px)";
+        setTimeout(() => {
+          tipIndex = (tipIndex + 1) % tipMessages.length;
+          tipTextEl.textContent = tipMessages[tipIndex];
+          // 다시 나타나는 애니메이션
+          tipTextEl.style.transform = "translateY(4px)";
+          requestAnimationFrame(() => {
+            tipTextEl.style.opacity = "1";
+            tipTextEl.style.transform = "translateY(0)";
+          });
+        }, 300);
+      }, 10000);
     }
 
     if (generateBtn) generateBtn.addEventListener("click", handleGenerate);
