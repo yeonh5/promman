@@ -414,7 +414,7 @@
 <body>
   <header>
     <div class="logo-image">
-      <img src="promman-hero.png" alt="PROMMAN hero image">
+      <img src="img/promman-hero.png" alt="PROMMAN hero image">
     </div>
     <h1><span>prom</span>man</h1>
     <span class="sub"></span>
@@ -478,7 +478,7 @@
         <div>
           <div class="status" style="padding-left:0;">장르 / 무드</div>
           <button id="genre-preview" class="shot-thumb" type="button">
-            <img src="genre-drama.png" alt="장르 thumbnail">
+            <img src="img/genre-drama.png" alt="장르 thumbnail">
             <span>Drama</span>
           </button>
         </div>
@@ -487,7 +487,7 @@
         <div>
           <div class="status" style="padding-left:0;">카메라 화각 (Shot)</div>
           <button id="shot-preview" class="shot-thumb" type="button">
-            <img src="shot-medium-shot.png" alt="Shot thumbnail">
+            <img src="img/shot-medium-shot.png" alt="Shot thumbnail">
             <span>Medium Shot</span>
           </button>
         </div>
@@ -496,7 +496,7 @@
         <div>
           <div class="status" style="padding-left:0;">카메라 앵글 (Angle)</div>
           <button id="angle-preview" class="shot-thumb" type="button">
-            <img src="angle-eye-level.png" alt="Angle thumbnail">
+            <img src="img/angle-eye-level.png" alt="Angle thumbnail">
             <span>Eye Level</span>
           </button>
         </div>
@@ -505,7 +505,7 @@
         <div>
           <div class="status" style="padding-left:0;">시간</div>
           <button id="time-preview" class="shot-thumb" type="button">
-            <img src="time-day.png" alt="Time thumbnail">
+            <img src="img/time-day.png" alt="Time thumbnail">
             <span>낮</span>
           </button>
         </div>
@@ -514,7 +514,7 @@
         <div>
           <div class="status" style="padding-left:0;">날씨</div>
           <button id="weather-preview" class="shot-thumb" type="button">
-            <img src="weather-clear.png" alt="Weather thumbnail">
+            <img src="img/weather-clear.png" alt="Weather thumbnail">
             <span>맑음</span>
           </button>
         </div>
@@ -929,47 +929,47 @@
 
     // 디렉터 컨트롤 팝업용 옵션들
     const GENRE_OPTIONS = [
-      { value: "action",      label: "Action",      img: "genre-action.png" },
-      { value: "romance",     label: "Romance",     img: "genre-romance.png" },
-      { value: "thriller",    label: "Thriller",    img: "genre-thriller.png" },
-      { value: "documentary", label: "Documentary", img: "genre-documentary.png" },
-      { value: "animation",   label: "Animation",   img: "genre-animation.png" },
-      { value: "drama",       label: "Drama",       img: "genre-drama.png" }
+      { value: "action",      label: "Action",      img: "img/genre-action.png" },
+      { value: "romance",     label: "Romance",     img: "img/genre-romance.png" },
+      { value: "thriller",    label: "Thriller",    img: "img/genre-thriller.png" },
+      { value: "documentary", label: "Documentary", img: "img/genre-documentary.png" },
+      { value: "animation",   label: "Animation",   img: "img/genre-animation.png" },
+      { value: "drama",       label: "Drama",       img: "img/genre-drama.png" }
     ];
 
     const SHOT_OPTIONS = [
-      { value: "",                label: "Recommend",         img: "shot-recommend.png" },
-      { value: "extreme_close_up", label: "Extreme Close-Up", img: "shot-extreme-close-up.png" },
-      { value: "close_up",         label: "Close-Up",         img: "shot-close-up.png" },
-      { value: "medium_close_up",  label: "Medium Close-Up",  img: "shot-medium-close-up.png" },
-      { value: "medium",           label: "Medium Shot",      img: "shot-medium-shot.png" },
-      { value: "medium_wide",      label: "Medium Wide Shot", img: "shot-medium-wide-shot.png" },
-      { value: "wide",             label: "Wide Shot",        img: "shot-wide-shot.png" },
-      { value: "extreme_wide",     label: "Extreme Wide Shot", img: "shot-extreme-wide-shot.png" }
+      { value: "",                label: "Recommend",         img: "img/shot-recommend.png" },
+      { value: "extreme_close_up", label: "Extreme Close-Up", img: "img/shot-extreme-close-up.png" },
+      { value: "close_up",         label: "Close-Up",         img: "img/shot-close-up.png" },
+      { value: "medium_close_up",  label: "Medium Close-Up",  img: "img/shot-medium-close-up.png" },
+      { value: "medium",           label: "Medium Shot",      img: "img/shot-medium-shot.png" },
+      { value: "medium_wide",      label: "Medium Wide Shot", img: "img/shot-medium-wide-shot.png" },
+      { value: "wide",             label: "Wide Shot",        img: "img/shot-wide-shot.png" },
+      { value: "extreme_wide",     label: "Extreme Wide Shot", img: "img/shot-extreme-wide-shot.png" }
     ];
 
     const ANGLE_OPTIONS = [
-      { value: "eye_level",   label: "Eye Level",        img: "angle-eye-level.png" },
-      { value: "low_angle",   label: "Low Angle",        img: "angle-low-angle.png" },
-      { value: "high_angle",  label: "High Angle",       img: "angle-high-angle.png" },
-      { value: "top_down",    label: "Bird's Eye View",  img: "angle-birds-eye-view.png" },
-      { value: "worms_eye",   label: "Worm's Eye View",  img: "angle-worms-eye-view.png" },
-      { value: "dutch_angle", label: "Dutch Angle",      img: "angle-dutch-angle.png" },
-      { value: "over_shoulder", label: "Over the Shoulder", img: "angle-over-the-shoulder.png" },
-      { value: "pov",         label: "Point of View",    img: "angle-point-of-view.png" }
+      { value: "eye_level",   label: "Eye Level",        img: "img/angle-eye-level.png" },
+      { value: "low_angle",   label: "Low Angle",        img: "img/angle-low-angle.png" },
+      { value: "high_angle",  label: "High Angle",       img: "img/angle-high-angle.png" },
+      { value: "top_down",    label: "Bird's Eye View",  img: "img/angle-birds-eye-view.png" },
+      { value: "worms_eye",   label: "Worm's Eye View",  img: "img/angle-worms-eye-view.png" },
+      { value: "dutch_angle", label: "Dutch Angle",      img: "img/angle-dutch-angle.png" },
+      { value: "over_shoulder", label: "Over the Shoulder", img: "img/angle-over-the-shoulder.png" },
+      { value: "pov",         label: "Point of View",    img: "img/angle-point-of-view.png" }
     ];
 
     const TIME_OPTIONS = [
-      { value: "dawn",  label: "새벽", img: "time-dawn.png" },
-      { value: "day",   label: "낮",   img: "time-day.png" },
-      { value: "dusk",  label: "노을", img: "time-dusk.png" },
-      { value: "night", label: "밤",   img: "time-night.png" }
+      { value: "dawn",  label: "새벽", img: "img/time-dawn.png" },
+      { value: "day",   label: "낮",   img: "img/time-day.png" },
+      { value: "dusk",  label: "노을", img: "img/time-dusk.png" },
+      { value: "night", label: "밤",   img: "img/time-night.png" }
     ];
 
     const WEATHER_OPTIONS = [
-      { value: "clear", label: "맑음", img: "weather-clear.png" },
-      { value: "snowy", label: "눈",   img: "weather-snow.png" },
-      { value: "rainy", label: "비",   img: "weather-rain.png" }
+      { value: "clear", label: "맑음", img: "img/weather-clear.png" },
+      { value: "snowy", label: "눈",   img: "img/weather-snow.png" },
+      { value: "rainy", label: "비",   img: "img/weather-rain.png" }
     ];
 
     function updatePreviewButton(btn, opt) {
