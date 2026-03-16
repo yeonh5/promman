@@ -54,7 +54,7 @@
     main {
       flex: 1;
       display: grid;
-      grid-template-columns: 1.4fr 1fr;
+      grid-template-columns: 0.9fr 1.4fr 1fr;
       min-height: 0;
       overflow: hidden;
     }
@@ -65,9 +65,14 @@
       border-left: 1px solid #111827;
     }
     .column:first-child { border-left: none; }
+    .column:nth-child(1),
+    .column:nth-child(2),
+    .column:nth-child(3) {
+      min-height: 0;
+    }
+    .column:nth-child(1),
     .column:nth-child(2) {
       overflow-y: auto;
-      min-height: 0;
     }
     .director-controls-inner {
       width: 100%;
@@ -173,6 +178,9 @@
       justify-content: space-between;
       align-items: center;
       gap: 8px;
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
     }
     .right-controls {
       display: flex;
@@ -295,6 +303,61 @@
       color: #f97373;
     }
 
+    .history-list {
+      padding: 10px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .history-item {
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      padding: 8px 10px;
+      font-size: 11px;
+      color: #d1d5db;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .history-text {
+      max-height: 4.5em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: pre-wrap;
+    }
+    .history-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: #6b7280;
+    }
+    .history-actions {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .history-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 3px 6px;
+      font-size: 10px;
+      cursor: pointer;
+      background: #020617;
+      color: #9ca3af;
+      border: 1px solid #374151;
+    }
+    .history-btn:hover {
+      background: #111827;
+      color: #e5e7eb;
+    }
+    .history-like.history-liked {
+      background: #facc15;
+      border-color: #eab308;
+      color: #111827;
+    }
+
   </style>
 </head>
 <body>
@@ -307,7 +370,16 @@
   </header>
 
   <main>
-    <!-- 왼쪽: 한국어 입력 + 결과 프롬프트 -->
+    <!-- 히스토리 컬럼 -->
+    <section class="column">
+      <div class="section-header">
+        <span>Prompt History</span>
+        <span class="sub2">즐겨찾기 · 과거 프롬프트</span>
+      </div>
+      <div id="history-list" class="history-list"></div>
+    </section>
+
+    <!-- 가운데: 한국어 입력 + 결과 프롬프트 -->
     <section class="column">
       <div class="section-header">
         <span>Generated Cinematic Prompt</span>
@@ -835,6 +907,7 @@
     const statusRight = document.getElementById("status-right");
     const copyBtn = document.getElementById("copy-btn");
     const modelSelect = document.getElementById("model-select");
+    const historyList = document.getElementById("history-list");
     const genreGroup = document.getElementById("genre-group");
     const shotGroup = document.getElementById("shot-group");
     const angleGroup = document.getElementById("angle-group");
@@ -850,6 +923,7 @@
     let timeOverride = "";
     let weatherOverride = "";
     let directorOverride = "none";
+    let historyCounter = 0;
 
     function setStatusRight(text, isError) {
       setStatus(statusRight, text, isError);
@@ -986,6 +1060,45 @@
     setupPillGroup(weatherGroup, (val) => { weatherOverride = val; }, weatherOverride);
     setupPillGroup(directorGroup, (val) => { directorOverride = val || "none"; }, directorOverride);
 
+    function addHistoryItem(text) {
+      if (!historyList || !text.trim()) return;
+      const id = ++historyCounter;
+      const item = document.createElement("div");
+      item.className = "history-item";
+      item.setAttribute("data-id", String(id));
+
+      const preview = document.createElement("div");
+      preview.className = "history-text";
+      preview.textContent = text;
+
+      const meta = document.createElement("div");
+      meta.className = "history-meta";
+      const label = document.createElement("span");
+      label.textContent = "Prompt " + id;
+      const actions = document.createElement("div");
+      actions.className = "history-actions";
+
+      const likeBtn = document.createElement("button");
+      likeBtn.type = "button";
+      likeBtn.className = "history-btn history-like";
+      likeBtn.textContent = "좋아요";
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.type = "button";
+      deleteBtn.className = "history-btn history-delete";
+      deleteBtn.textContent = "삭제";
+
+      actions.appendChild(likeBtn);
+      actions.appendChild(deleteBtn);
+      meta.appendChild(label);
+      meta.appendChild(actions);
+
+      item.appendChild(preview);
+      item.appendChild(meta);
+
+      historyList.insertBefore(item, historyList.firstChild);
+    }
+
     function getPersonas() {
       if (!personaRow) return [];
       const inputs = Array.from(personaRow.querySelectorAll(".persona-input"));
@@ -1064,11 +1177,31 @@
             : prompt;
 
         promptOutput.textContent = finalPrompt;
+        addHistoryItem(finalPrompt);
         setStatusRight("SceneSchema · 프롬프트 생성 완료.", false);
       } catch (e) {
         setStatusRight("SceneSchema 생성 실패: " + e.message, true);
       }
     });
+
+    if (historyList) {
+      historyList.addEventListener("click", (e) => {
+        const target = e.target;
+        if (!(target instanceof HTMLElement)) return;
+        const item = target.closest(".history-item");
+        if (!item) return;
+        if (target.classList.contains("history-delete")) {
+          e.preventDefault();
+          item.remove();
+          return;
+        }
+        if (target.classList.contains("history-like")) {
+          e.preventDefault();
+          target.classList.toggle("history-liked");
+          return;
+        }
+      });
+    }
 
     copyBtn.addEventListener("click", async () => {
       const text = promptOutput.textContent || "";
